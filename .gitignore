@@ -1,0 +1,40 @@
+# Node.js
+**/node_modules/
+**/.next/
+**/out/
+**/build/
+**/.docusaurus/
+.next/
+node_modules/
+
+# Python Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+__pycache__/
+*.pyc
+
+# Local Environment Variables / Secrets
+.env.local
+.env.*.local
+**/.env.local
+**/.env.*.local
+
+# IDE/OS files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# TypeScript compilation info
+*.tsbuildinfo
+
+# Ignore all markdown files
+*.md
+**/*.md
