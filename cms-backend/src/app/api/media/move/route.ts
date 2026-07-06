@@ -28,18 +28,11 @@ export const PATCH = withApiAuth(async (req, user) => {
       },
       { status: 200 }
     );
-  } catch (error: unknown) {
+  } catch (error) {
     if (error instanceof ZodError) {
-      return NextResponse.json(
-        { success: false, error: "Validation error", details: error.issues },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: "Validation error", details: error.issues }, { status: 400 });
     }
-    const message = error instanceof Error ? error.message : "Failed to move files";
-    if (message.includes("does not exist")) {
-      return NextResponse.json({ success: false, error: message }, { status: 400 });
-    }
-    console.error("[PATCH /api/media/move]", message);
+    console.error("[PATCH /api/media/move]", error);
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }, "MEDIA_UPDATE");

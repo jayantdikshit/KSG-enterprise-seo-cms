@@ -35,8 +35,26 @@ export const renameFolderSchema = z.object({
 });
 
 export const moveFilesSchema = z.object({
-  ids: z.array(z.string().regex(objectIdRegex, "Invalid Media ID format")).min(1, "At least one file ID is required"),
-  folder: z.string().min(1, "Target folder is required"),
+  // Accept a single string or an array of strings for IDs
+  ids: z.preprocess((val) => {
+    // If the incoming value is a string, split by commas and trim each element
+    if (typeof val === "string") {
+      return val.split(",").map((s) => s.trim()).filter((s) => s.length > 0);
+    }
+    return val;
+  },
+    z
+      .array(
+        z
+          .string()
+          .transform((val) => val.replace(/^ObjectId\(|\)$/g, "").trim())
+          .refine((val) => objectIdRegex.test(val), {
+            message: "Invalid Media ID format",
+          })
+      )
+      .min(1, "At least one file ID is required")
+  ),
+  folder: z.string().trim().min(1, "Target folder is required"),
 });
 
 export const bulkDeleteSchema = z.object({

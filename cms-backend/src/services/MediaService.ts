@@ -10,8 +10,8 @@ import {
   deleteMediaFiles,
   getFileType,
   saveBufferToUpload,
-} from "@/utils/storage";
-import sharp from "sharp";
+} from "../utils/storage";
+
 import path from "path";
 
 export class MediaService {
@@ -417,7 +417,16 @@ export class MediaService {
       }
     }
 
-    const objectIds = ids.map((id) => new mongoose.Types.ObjectId(id));
+    // Clean and validate each ID format before converting to ObjectId
+    const objectIdRegex = /^[0-9a-fA-F]{24}$/;
+    const cleanedIds = ids.map((id) => {
+      const str = typeof id === "string" ? id.replace(/^ObjectId\(|\)$/g, "").trim() : String(id);
+      if (!objectIdRegex.test(str)) {
+        throw new Error(`Invalid Media ID format: ${id}`);
+      }
+      return str;
+    });
+    const objectIds = cleanedIds.map((id) => new mongoose.Types.ObjectId(id));
 
     // Get old data for audit logs
     const oldMediaItems = await Media.find({ _id: { $in: objectIds } });
