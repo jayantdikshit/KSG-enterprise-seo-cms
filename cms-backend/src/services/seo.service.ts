@@ -1,8 +1,10 @@
 import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
-import { SitemapStream, streamToPromise } from 'sitemap';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { SitemapStream, streamToPromise } = require('sitemap');
 import { Readable } from 'stream';
+import { connectDB } from '../lib/mongodb';
 import SeoSettingModel from '../models/SeoSetting';
 import PageModel from '../models/Page';
 import ServiceModel from '../models/Service';
@@ -17,6 +19,8 @@ import BlogModel from '../models/Blog';
 class SeoService {
   /** Generate sitemap XML based on published pages, services and blogs */
   static async generateSitemap(baseUrl: string): Promise<string> {
+    // Ensure DB connection before any query
+    await connectDB();
     const sitemap = new SitemapStream({ hostname: baseUrl });
     const docs: Array<{ loc: string; lastmod?: Date }> = [];
 

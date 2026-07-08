@@ -3,6 +3,7 @@ import { MediaService } from "@/services/MediaService";
 import { moveFilesSchema } from "@/validators/media.validator";
 import { withApiAuth } from "@/middleware/apiAuth";
 import { ZodError } from "zod";
+export const runtime = 'nodejs';
 
 export const PATCH = withApiAuth(async (req, user) => {
   try {

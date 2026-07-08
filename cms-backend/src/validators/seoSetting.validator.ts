@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { NextRequest, NextResponse } from 'next/server';
+import { SeoSettingModel } from '@/models/seoSetting';
 
 export const seoSettingSchema = z.object({
   siteName: z.string().min(1, 'Site name required'),
@@ -14,3 +16,6 @@ export const seoSettingSchema = z.object({
   facebookVerification: z.string().optional(),
   twitterHandle: z.string().optional(),
 });
+
+// Partial schema for updates – all fields optional
+export const seoSettingUpdateSchema = seoSettingSchema.partial();

@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import SeoSettingModel from '../../../../models/SeoSetting';
-import { seoSettingSchema } from '../../../../validators/seoSetting.validator';
+import { seoSettingSchema, seoSettingUpdateSchema } from '../../../../validators/seoSetting.validator';
 import { checkRole } from '../../../../middleware/page.middleware';
+export const runtime = 'nodejs';
 
 /**
  * GET  - Retrieve current global SEO settings (single document).
@@ -31,7 +32,8 @@ export const POST = async (req: NextRequest) => {
 
 export const PUT = async (req: NextRequest) => {
   const body = await req.json();
-  const parsed = seoSettingSchema.safeParse(body);
+  // Allow partial updates – use update schema where all fields are optional
+  const parsed = seoSettingUpdateSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ success: false, error: parsed.error.format() }, { status: 400 });
   }
