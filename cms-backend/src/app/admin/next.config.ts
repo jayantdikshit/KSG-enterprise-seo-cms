@@ -2,7 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  // Admin UI resides in src/app/admin (handled by Next 13+)
 };
 
 export default nextConfig;
