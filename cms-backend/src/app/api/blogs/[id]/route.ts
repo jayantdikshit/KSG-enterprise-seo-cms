@@ -27,8 +27,10 @@ export async function GET(
           if (decoded && decoded.id) {
             await connectDB();
             const userDoc = await User.findById(decoded.id).populate("role");
-            if (userDoc && userDoc.isActive) {
-              const permissions: string[] = userDoc.role?.permissions || [];
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+if (userDoc && (userDoc as any).isActive) {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+const permissions: string[] = (userDoc as any).role?.permissions || [];
               if (permissions.includes("BLOGS_READ") || permissions.includes("ALL")) {
                 previewMode = true;
               }

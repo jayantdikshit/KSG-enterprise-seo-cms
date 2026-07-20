@@ -56,7 +56,7 @@ const AuditLogSchema = new mongoose.Schema(
 );
 
 if (mongoose.models && mongoose.models.AuditLog) {
-  delete (mongoose.models as any).AuditLog;
+  delete (mongoose.models as Record<string, unknown>)['AuditLog'];
 }
 const AuditLog = mongoose.model("AuditLog", AuditLogSchema);
 export default AuditLog;

@@ -22,13 +22,13 @@ const FolderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-let FolderModel: mongoose.Model<any>;
+let FolderModel: mongoose.Model<unknown>;
 try {
   if (mongoose.models && mongoose.models.Folder) {
-    delete (mongoose.models as any).Folder;
+    delete (mongoose.models as Record<string, unknown>)['Folder'];
   }
   FolderModel = mongoose.model("Folder", FolderSchema);
-} catch (e) {
+} catch (_) {
   FolderModel = mongoose.model("Folder", FolderSchema);
 }
 

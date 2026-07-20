@@ -19,6 +19,7 @@ export function withApiAuth(
       const authHeader = req.headers.get("authorization");
       
       if (!authHeader) {
+        console.error("401: authHeader missing");
         return NextResponse.json(
           { success: false, error: "Authorization header is missing" },
           { status: 401 }
@@ -30,6 +31,7 @@ export function withApiAuth(
         : authHeader.split(" ")[1];
 
       if (!token) {
+        console.error("401: token missing");
         return NextResponse.json(
           { success: false, error: "Bearer token is missing" },
           { status: 401 }
@@ -40,6 +42,7 @@ export function withApiAuth(
       try {
         decoded = verifyAccessToken(token);
       } catch (err) {
+        console.error("401: verifyAccessToken failed", err);
         return NextResponse.json(
           { success: false, error: "Invalid or expired token" },
           { status: 401 }

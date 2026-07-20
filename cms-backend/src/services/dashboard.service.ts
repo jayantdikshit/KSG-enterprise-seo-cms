@@ -17,7 +17,7 @@ import {
   recentPages,
   recentMedia,
   recentLogins,
-  recentRedirects,
+
   countSeoPagesMissingMeta,
   countSeoPagesMissingOgImage,
   getSitemapStatus,
@@ -33,7 +33,7 @@ const quickActions = {
   SUPER_ADMIN: [
     { label: 'Create Page', href: '/admin/pages/create' },
     { label: 'Create Blog', href: '/admin/blogs/create' },
-    { label: 'Upload Media', href: '/admin/media/upload' },
+    { label: 'Upload Media', href: '/admin/media?upload=true' },
     { label: 'Create Service', href: '/admin/services/create' }
   ],
   EDITOR: [
@@ -49,8 +49,8 @@ const quickActions = {
     { label: 'Create Redirect', href: '/admin/redirects/create' }
   ],
   MEDIA_MANAGER: [
-    { label: 'Upload Image', href: '/admin/media/upload-image' },
-    { label: 'Upload PDF', href: '/admin/media/upload-pdf' }
+    { label: 'Upload Image', href: '/admin/media?upload=true' },
+    { label: 'Upload PDF', href: '/admin/media?upload=true' }
   ]
 };
 

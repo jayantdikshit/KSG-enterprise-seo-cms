@@ -15,9 +15,7 @@ export const updateLeadSchema = z.object({
   phone: z.string().min(5, "Phone number must be at least 5 characters").max(20).optional(),
   companyName: z.string().optional(),
   message: z.string().min(10, "Message must be at least 10 characters").max(2000).optional(),
-  status: z.enum(["NEW", "CONTACTED", "QUALIFIED", "CLOSED"], {
-    errorMap: () => ({ message: "Invalid status. Must be NEW, CONTACTED, QUALIFIED, or CLOSED." })
-  }).optional(),
+  status: z.enum(["NEW", "CONTACTED", "QUALIFIED", "CLOSED"]).optional(),
 });
 
 export type CreateContactInput = z.infer<typeof createContactSchema>;

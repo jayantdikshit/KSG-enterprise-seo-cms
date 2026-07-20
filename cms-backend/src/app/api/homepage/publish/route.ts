@@ -19,7 +19,7 @@ export const PATCH = withApiAuth(async (req, user) => {
         message: "Homepage published successfully",
         data: {
           _id: homepage._id,
-          status: homepage.status,
+          status: (homepage as any).status,
         },
       },
       { status: 200 }

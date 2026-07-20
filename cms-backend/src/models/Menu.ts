@@ -89,7 +89,7 @@ const MenuSchema = new mongoose.Schema(
 );
 
 // Prevent re-compilation of models during dev hot reloads
-let MenuModel: mongoose.Model<any>;
+let MenuModel: mongoose.Model<unknown>;
 try {
   MenuModel = mongoose.model("Menu");
 } catch (e) {

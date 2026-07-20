@@ -46,7 +46,7 @@ const LeadSchema = new mongoose.Schema(
 );
 
 // Prevent re-compilation of models during dev hot reloads
-let LeadModel: mongoose.Model<any>;
+let LeadModel: mongoose.Model<unknown>;
 try {
   LeadModel = mongoose.model("Lead");
 } catch (e) {

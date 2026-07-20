@@ -143,6 +143,11 @@ export class AuthService {
       permissions: role?.permissions || [],
     };
 
-    return generateAccessToken(payload);
+    const accessToken = generateAccessToken(payload);
+
+    const safeUser = user.toObject() as { password?: string } & Record<string, unknown>;
+    delete safeUser.password;
+
+    return { accessToken, user: safeUser };
   }
 }

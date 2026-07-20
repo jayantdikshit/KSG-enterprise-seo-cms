@@ -46,7 +46,14 @@ const blogBaseSchema = z.object({
   ogDescription: z.string().max(160, "OG Description cannot exceed 160 characters").optional(),
   ogImage: z.string().optional(),
   twitterCard: z.string().optional(),
+  twitterTitle: z.string().max(100, "Twitter Title cannot exceed 100 characters").optional(),
+  twitterDescription: z.string().max(160, "Twitter Description cannot exceed 160 characters").optional(),
+  twitterImage: z.string().optional(),
   schemaMarkup: z.string().optional(),
+  robotsIndex: z.boolean().optional(),
+  robotsFollow: z.boolean().optional(),
+  generateFaqSchema: z.boolean().optional(),
+  generateBreadcrumbSchema: z.boolean().optional(),
 });
 
 export const createBlogSchema = blogBaseSchema.extend({
@@ -68,7 +75,14 @@ export const createBlogSchema = blogBaseSchema.extend({
   ogDescription: z.string().max(160, "OG Description cannot exceed 160 characters").optional().default(""),
   ogImage: z.string().optional().default(""),
   twitterCard: z.string().optional().default("summary_large_image"),
+  twitterTitle: z.string().max(100, "Twitter Title cannot exceed 100 characters").optional().default(""),
+  twitterDescription: z.string().max(160, "Twitter Description cannot exceed 160 characters").optional().default(""),
+  twitterImage: z.string().optional().default(""),
   schemaMarkup: z.string().optional().default(""),
+  robotsIndex: z.boolean().optional().default(true),
+  robotsFollow: z.boolean().optional().default(true),
+  generateFaqSchema: z.boolean().optional().default(true),
+  generateBreadcrumbSchema: z.boolean().optional().default(true),
 });
 
 export const updateBlogSchema = blogBaseSchema.partial();

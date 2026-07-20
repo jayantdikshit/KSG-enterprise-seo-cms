@@ -37,7 +37,7 @@ const BlogCategorySchema = new mongoose.Schema(
 );
 
 // Prevent re-compilation of models during Next.js dev hot reloads
-let BlogCategoryModel: mongoose.Model<any>;
+let BlogCategoryModel: mongoose.Model<unknown>;
 try {
   BlogCategoryModel = mongoose.model("BlogCategory");
 } catch (e) {

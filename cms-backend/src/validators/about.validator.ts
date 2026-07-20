@@ -69,7 +69,7 @@ const aboutCreateSchema = aboutBaseSchema.extend({
   schemaMarkup: z.string().optional().default(""),
 });
 
-const normalizeAboutKeys = (val: any) => {
+const normalizeAboutKeys = (val: unknown) => {
   if (val && typeof val === "object") {
     const copy = { ...val };
     if (copy.canonicalURL !== undefined && copy.canonicalUrl === undefined) {

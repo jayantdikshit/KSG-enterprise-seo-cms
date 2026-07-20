@@ -21,11 +21,11 @@ const RoleSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-let RoleModel: mongoose.Model<any>;
-try {
-  RoleModel = mongoose.model("Role");
-} catch (error) {
-  RoleModel = mongoose.model("Role", RoleSchema);
+let RoleModel: mongoose.Model<unknown>;
+if (mongoose.models.Role) {
+  RoleModel = mongoose.model<unknown>('Role');
+} else {
+  RoleModel = mongoose.model<unknown>('Role', RoleSchema);
 }
 
 export default RoleModel;

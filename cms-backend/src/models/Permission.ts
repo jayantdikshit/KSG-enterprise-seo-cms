@@ -8,7 +8,7 @@ const PermissionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-let PermissionModel: mongoose.Model<any>;
+let PermissionModel: mongoose.Model<unknown>;
 try {
   PermissionModel = mongoose.model("Permission");
 } catch (error) {

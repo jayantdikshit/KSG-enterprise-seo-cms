@@ -27,6 +27,7 @@ function getMailTransporter() {
   });
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function sendAdminNotification(lead: any) {
   const transporter = getMailTransporter();
   if (!transporter) return;
@@ -82,6 +83,7 @@ async function sendAdminNotification(lead: any) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function sendUserNotification(lead: any) {
   const transporter = getMailTransporter();
   if (!transporter) return;
@@ -164,7 +166,7 @@ export class LeadService {
     await connectDB();
     const skip = (page - 1) * limit;
 
-    const query: Record<string, any> = {};
+    const query: Record<string, unknown> = {};
 
     if (search) {
       query.$or = [

@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import { AuthService } from "../../../../services/AuthService";
 
-export const runtime = 'nodejs';
+import { NextRequest, NextResponse } from 'next/server';
+import { AuthService } from '@/services/AuthService';
+
+
 
 /**
  * GET – simple health‑check for the login endpoint.
@@ -14,23 +15,59 @@ export const GET = async (_req: NextRequest) => {
   });
 };
 
+/**
+ * POST – authenticate user and set HttpOnly refresh token cookie.
+ */
 export const POST = async (req: NextRequest) => {
   try {
-    const body = await req.json();
+    // Guard: if a valid refresh token cookie exists, attempt to refresh and return
+    const existingToken = req.cookies.get('refreshToken')?.value;
+    if (existingToken) {
+      try {
+        const refreshed = await AuthService.refresh(existingToken);
+        return NextResponse.json({ success: true, data: refreshed });
+      } catch (_) {
+        // Invalid/expired token – proceed with normal login
+      }
+    }
+
+    const rawBody = await req.text();
+    let body: any;
+    try {
+      // Try normal JSON parsing
+      body = JSON.parse(rawBody);
+    } catch (_) {
+      // Fallback: handle double‑escaped JSON string (e.g., "{\"email\":...}")
+      try {
+        const inner = JSON.parse(rawBody);
+        body = JSON.parse(inner);
+      } catch (e2) {
+        console.error('Unable to parse login request body', e2);
+        return NextResponse.json({ success: false, message: 'Invalid JSON payload' }, { status: 400 });
+      }
+    }
     const { email, password } = body;
     const data = await AuthService.login(email, password);
-    return NextResponse.json({
+    console.log('✅ Login success, data:', data);
+
+    // Return fields in a shape the client expects (top‑level accessToken & user)
+    const response = NextResponse.json({
       success: true,
-      data,
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
+      user: data.user,
     });
+    // Set HttpOnly refresh token cookie (secure flag omitted for local dev)
+    response.cookies.set('refreshToken', data.refreshToken, {
+      httpOnly: true,
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+      sameSite: 'lax',
+    });
+    return response;
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Login failed";
-    return NextResponse.json(
-      {
-        success: false,
-        message,
-      },
-      { status: 401 }
-    );
+    console.error('❌ Login error:', error);
+    return NextResponse.json({ success: false, message }, { status: 401 });
   }
 };

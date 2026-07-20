@@ -82,7 +82,7 @@ export class AboutService {
   }
 
   static async addTeamMember(
-    memberData: any,
+    memberData: unknown,
     userId: string,
     ipAddress?: string,
     userAgent?: string
@@ -119,7 +119,7 @@ export class AboutService {
 
   static async updateTeamMember(
     memberId: string,
-    memberData: any,
+    memberData: unknown,
     userId: string,
     ipAddress?: string,
     userAgent?: string
@@ -131,7 +131,8 @@ export class AboutService {
       throw new Error("About page not found");
     }
 
-    const member = (about.teamMembers as any).id(memberId);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const member = (about.teamMembers as unknown as any).id(memberId);
     if (!member) {
       throw new Error("Team member not found");
     }
@@ -172,13 +173,15 @@ export class AboutService {
       throw new Error("About page not found");
     }
 
-    const member = (about.teamMembers as any).id(memberId);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const member = (about.teamMembers as unknown as any).id(memberId);
     if (!member) {
       throw new Error("Team member not found");
     }
 
     const oldData = about.toObject();
-    (about.teamMembers as any).pull(memberId);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (about.teamMembers as unknown as any).pull(memberId);
     const updated = await about.save();
 
     await AuditLog.create({
@@ -198,7 +201,7 @@ export class AboutService {
   }
 
   static async addStatistic(
-    statData: any,
+    statData: unknown,
     userId: string,
     ipAddress?: string,
     userAgent?: string
@@ -235,7 +238,7 @@ export class AboutService {
 
   static async updateStatistic(
     statId: string,
-    statData: any,
+    statData: unknown,
     userId: string,
     ipAddress?: string,
     userAgent?: string
@@ -247,7 +250,8 @@ export class AboutService {
       throw new Error("About page not found");
     }
 
-    const stat = (about.statistics as any).id(statId);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const stat = (about.statistics as unknown as any).id(statId);
     if (!stat) {
       throw new Error("Statistic not found");
     }
@@ -288,13 +292,15 @@ export class AboutService {
       throw new Error("About page not found");
     }
 
-    const stat = (about.statistics as any).id(statId);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const stat = (about.statistics as unknown as any).id(statId);
     if (!stat) {
       throw new Error("Statistic not found");
     }
 
     const oldData = about.toObject();
-    (about.statistics as any).pull(statId);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (about.statistics as unknown as any).pull(statId);
     const updated = await about.save();
 
     await AuditLog.create({

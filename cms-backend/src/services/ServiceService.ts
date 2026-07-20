@@ -121,7 +121,7 @@ export class ServiceService {
     await connectDB();
 
     const skip = (page - 1) * limit;
-    const query: Record<string, any> = { isActive: true };
+    const query: Record<string, unknown> = { isActive: true };
 
     if (search) {
       query.$or = [

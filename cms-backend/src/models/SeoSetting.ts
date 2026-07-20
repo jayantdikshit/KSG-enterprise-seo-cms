@@ -15,7 +15,7 @@ const SeoSettingSchema = new mongoose.Schema({
   twitterHandle: { type: String, default: '' },
 }, { timestamps: true });
 
-let SeoSettingModel: mongoose.Model<any>;
+let SeoSettingModel: mongoose.Model<unknown>;
 try {
   SeoSettingModel = mongoose.model('SeoSetting');
 } catch (e) {

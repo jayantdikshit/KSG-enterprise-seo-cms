@@ -25,6 +25,8 @@ export interface CreateServiceDTO {
   ogDescription?: string;
   ogImage?: string;
   schemaMarkup?: string;
+  generateFaqSchema?: boolean;
+  generateBreadcrumbSchema?: boolean;
 }
 
 export interface UpdateServiceDTO {
@@ -49,6 +51,8 @@ export interface UpdateServiceDTO {
   ogDescription?: string;
   ogImage?: string;
   schemaMarkup?: string;
+  generateFaqSchema?: boolean;
+  generateBreadcrumbSchema?: boolean;
 }
 
 export interface ServiceDTO {
@@ -74,6 +78,8 @@ export interface ServiceDTO {
   ogDescription?: string;
   ogImage?: string;
   schemaMarkup?: string;
+  generateFaqSchema: boolean;
+  generateBreadcrumbSchema: boolean;
   createdBy: string;
   updatedBy?: string;
   isActive: boolean;

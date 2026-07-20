@@ -1,8 +1,7 @@
 import mongoose from 'mongoose';
-import fs from 'fs';
-import path from 'path';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { SitemapStream, streamToPromise } = require('sitemap');
+
+ 
+import { SitemapStream, streamToPromise } from 'sitemap';
 import { Readable } from 'stream';
 import { connectDB } from '../lib/mongodb';
 import SeoSettingModel from '../models/SeoSetting';
@@ -25,7 +24,7 @@ class SeoService {
     const docs: Array<{ loc: string; lastmod?: Date }> = [];
 
     // Helper to push docs from a model
-    const pushFromModel = async (Model: mongoose.Model<any>, pathPrefix: string) => {
+    const pushFromModel = async (Model: mongoose.Model<unknown>, pathPrefix: string) => {
       const items = await Model.find({ status: 'PUBLISHED' }).select('_id updatedAt');
       items.forEach((item: any) => {
         const loc = `${pathPrefix}/${item._id}`;

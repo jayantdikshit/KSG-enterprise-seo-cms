@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
-import { SeoSettingModel } from '@/models/seoSetting';
+import SeoSettingModel from '@/models/SeoSetting';
 
 export const seoSettingSchema = z.object({
   siteName: z.string().min(1, 'Site name required'),

@@ -146,7 +146,7 @@ const AboutSchema = new mongoose.Schema(
 );
 
 // Prevent re-compilation of models during dev hot reloads
-let AboutModel: mongoose.Model<any>;
+let AboutModel: mongoose.Model<unknown>;
 try {
   AboutModel = mongoose.model("About");
 } catch (e) {

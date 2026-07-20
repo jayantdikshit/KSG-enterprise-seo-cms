@@ -80,9 +80,37 @@ const BlogSchema = new mongoose.Schema(
       type: String,
       default: "summary_large_image",
     },
+    twitterTitle: {
+      type: String,
+      default: "",
+    },
+    twitterDescription: {
+      type: String,
+      default: "",
+    },
+    twitterImage: {
+      type: String,
+      default: "",
+    },
     schemaMarkup: {
       type: String,
       default: "",
+    },
+    robotsIndex: {
+      type: Boolean,
+      default: true,
+    },
+    robotsFollow: {
+      type: Boolean,
+      default: true,
+    },
+    generateFaqSchema: {
+      type: Boolean,
+      default: true,
+    },
+    generateBreadcrumbSchema: {
+      type: Boolean,
+      default: true,
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -102,11 +130,23 @@ const BlogSchema = new mongoose.Schema(
 );
 
 // Prevent re-compilation of models during Next.js dev hot reloads
-let BlogModel: mongoose.Model<any>;
-try {
-  BlogModel = mongoose.model("Blog");
-} catch (e) {
-  BlogModel = mongoose.model("Blog", BlogSchema);
+interface BlogDocument extends mongoose.Document {
+  title: string;
+  slug?: string;
+  featuredImage?: string;
+  publishDate?: Date;
+  updatedAt?: Date;
+  authorName?: string;
+  author?: any;
+  category?: any;
+  metaDescription?: string;
+  schemaMarkup?: string;
+}
+let BlogModel: mongoose.Model<mongoose.Document>;
+if (mongoose.models.Blog) {
+  BlogModel = mongoose.model('Blog');
+} else {
+  BlogModel = mongoose.model('Blog', BlogSchema);
 }
 
 export default BlogModel;

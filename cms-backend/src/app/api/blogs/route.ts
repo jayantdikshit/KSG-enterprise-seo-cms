@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
     const tag = searchParams.get("tag") || undefined;
     const sort = searchParams.get("sort") || undefined;
 
-    if (page < 1 || limit < 1 || limit > 100) {
+    if (page < 1 || limit < 1 || limit > 1000) {
       return NextResponse.json(
         { success: false, error: "Invalid pagination parameters" },
         { status: 400 }

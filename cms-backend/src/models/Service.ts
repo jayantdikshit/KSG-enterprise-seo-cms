@@ -117,6 +117,16 @@ const ServiceSchema = new mongoose.Schema(
       default: "",
     },
 
+    generateFaqSchema: {
+      type: Boolean,
+      default: true,
+    },
+
+    generateBreadcrumbSchema: {
+      type: Boolean,
+      default: true,
+    },
+
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -137,7 +147,7 @@ const ServiceSchema = new mongoose.Schema(
 );
 
 // Prevent re-compilation of models during dev hot reloads
-let ServiceModel: mongoose.Model<any>;
+let ServiceModel: mongoose.Model<unknown>;
 try {
   ServiceModel = mongoose.model("Service");
 } catch (e) {

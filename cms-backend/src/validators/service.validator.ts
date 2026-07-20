@@ -10,7 +10,7 @@ const serviceBaseSchema = z.object({
   
   slug: z
     .preprocess(
-      (val) => (typeof val === "string" ? val.toLowerCase().trim() : val),
+      (val) => (typeof val === "string" ? val.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') : val),
       z.string()
         .min(3, "Slug must be at least 3 characters")
         .regex(/^[a-z0-9-]+$/, "Slug must contain only lowercase letters, numbers, and hyphens")
@@ -40,7 +40,17 @@ const serviceBaseSchema = z.object({
 
   seoTitle: z.string().max(60).optional(),
   metaDescription: z.string().max(160).optional(),
-  metaKeywords: z.array(z.string()).optional(),
+  metaKeywords: z
+    .preprocess(
+      (val) => {
+        if (typeof val === "string") {
+          return val.split(",").map((k) => k.trim()).filter(Boolean);
+        }
+        return val;
+      },
+      z.array(z.string())
+    )
+    .optional(),
   canonicalUrl: z.string().optional(),
 
   ogTitle: z.string().max(100).optional(),
@@ -48,6 +58,8 @@ const serviceBaseSchema = z.object({
   ogImage: z.string().optional(),
 
   schemaMarkup: z.string().optional(),
+  generateFaqSchema: z.boolean().optional(),
+  generateBreadcrumbSchema: z.boolean().optional(),
 });
 
 export const createServiceSchema = serviceBaseSchema.extend({
@@ -70,12 +82,25 @@ export const createServiceSchema = serviceBaseSchema.extend({
     .default("DRAFT"),
   seoTitle: z.string().max(60).optional().default(""),
   metaDescription: z.string().max(160).optional().default(""),
-  metaKeywords: z.array(z.string()).optional().default([]),
+  metaKeywords: z
+    .preprocess(
+      (val) => {
+        if (typeof val === "string") {
+          return val.split(",").map((k) => k.trim()).filter(Boolean);
+        }
+        return val;
+      },
+      z.array(z.string())
+    )
+    .optional()
+    .default([]),
   canonicalUrl: z.string().optional().default(""),
   ogTitle: z.string().max(100).optional().default(""),
   ogDescription: z.string().max(160).optional().default(""),
   ogImage: z.string().optional().default(""),
   schemaMarkup: z.string().optional().default(""),
+  generateFaqSchema: z.boolean().optional().default(true),
+  generateBreadcrumbSchema: z.boolean().optional().default(true),
 });
 
 export const updateServiceSchema = serviceBaseSchema.partial();

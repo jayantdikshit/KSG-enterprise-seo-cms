@@ -127,7 +127,7 @@ const PageSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-let PageModel: mongoose.Model<any>;
+let PageModel: mongoose.Model<unknown>;
 try {
   PageModel = mongoose.model("Page");
 } catch (e) {

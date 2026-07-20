@@ -17,7 +17,14 @@ export interface CreateBlogDTO {
   ogDescription?: string;
   ogImage?: string;
   twitterCard?: string;
+  twitterTitle?: string;
+  twitterDescription?: string;
+  twitterImage?: string;
   schemaMarkup?: string;
+  robotsIndex?: boolean;
+  robotsFollow?: boolean;
+  generateFaqSchema?: boolean;
+  generateBreadcrumbSchema?: boolean;
 }
 
 export interface UpdateBlogDTO {
@@ -39,7 +46,14 @@ export interface UpdateBlogDTO {
   ogDescription?: string;
   ogImage?: string;
   twitterCard?: string;
+  twitterTitle?: string;
+  twitterDescription?: string;
+  twitterImage?: string;
   schemaMarkup?: string;
+  robotsIndex?: boolean;
+  robotsFollow?: boolean;
+  generateFaqSchema?: boolean;
+  generateBreadcrumbSchema?: boolean;
 }
 
 export interface BlogDTO {
@@ -62,7 +76,14 @@ export interface BlogDTO {
   ogDescription: string;
   ogImage: string;
   twitterCard: string;
+  twitterTitle: string;
+  twitterDescription: string;
+  twitterImage: string;
   schemaMarkup: string;
+  robotsIndex: boolean;
+  robotsFollow: boolean;
+  generateFaqSchema: boolean;
+  generateBreadcrumbSchema: boolean;
   createdBy: any;
   updatedBy?: any;
   isActive: boolean;

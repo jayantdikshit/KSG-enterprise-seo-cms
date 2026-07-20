@@ -170,10 +170,10 @@ const HomePageSchema = new mongoose.Schema(
 );
 
 // Prevent re-compilation of models during dev hot reloads
-let HomePageModel: mongoose.Model<any>;
+let HomePageModel: mongoose.Model<unknown>;
 try {
   HomePageModel = mongoose.model("HomePage");
-} catch (e) {
+} catch (_) {
   HomePageModel = mongoose.model("HomePage", HomePageSchema);
 }
 

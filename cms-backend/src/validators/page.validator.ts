@@ -3,7 +3,7 @@ import { z } from "zod";
 const sectionSchema = z.object({
   id: z.string().min(1, "Section ID is required"),
   type: z.string().min(1, "Section type is required"),
-  properties: z.record(z.string(), z.any()).optional().default({}),
+  properties: z.record(z.string(), z.unknown()).optional().default({}),
   order: z.number().int().nonnegative("Order must be a non-negative integer"),
 });
 

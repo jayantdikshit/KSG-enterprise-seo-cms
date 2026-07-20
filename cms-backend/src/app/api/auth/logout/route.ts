@@ -12,12 +12,13 @@ export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
 
-    // token can come from body OR header
+    // token can come from body, header, or HttpOnly cookie (refreshToken)
+    const cookieToken = req.cookies?.get('refreshToken')?.value;
     const authHeader = req.headers.get("authorization");
-    const tokenFromHeader = authHeader?.split(" ")[1];
+    const tokenFromHeader = authHeader?.split(' ')[1];
     const tokenFromBody = body?.refreshToken || body?.accessToken;
+    const token = tokenFromHeader || tokenFromBody || cookieToken;
 
-    const token = tokenFromHeader || tokenFromBody;
 
     if (!token) {
       return NextResponse.json(
@@ -75,11 +76,14 @@ export async function POST(req: Request) {
     user.refreshToken = undefined;
     await user.save();
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: "Logged out successfully",
       tokenType: isRefreshToken ? "refresh" : "access",
     });
+    // Delete the refresh token cookie
+    response.cookies.set('refreshToken', '', { maxAge: 0, path: '/' });
+    return response;
   } catch (error: unknown) {
     const message =
       error instanceof Error ? error.message : "Logout failed";
