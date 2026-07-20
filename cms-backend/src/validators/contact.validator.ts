@@ -16,6 +16,11 @@ export const updateLeadSchema = z.object({
   companyName: z.string().optional(),
   message: z.string().min(10, "Message must be at least 10 characters").max(2000).optional(),
   status: z.enum(["NEW", "CONTACTED", "QUALIFIED", "CLOSED"]).optional(),
+  notes: z.array(z.object({
+    content: z.string(),
+    author: z.string(),
+    createdAt: z.string().or(z.date()).optional()
+  })).optional(),
 });
 
 export type CreateContactInput = z.infer<typeof createContactSchema>;

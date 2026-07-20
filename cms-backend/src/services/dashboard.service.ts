@@ -9,6 +9,9 @@ import {
   countMediaFiles,
   countActiveRedirects,
   countMenus,
+  countNewLeads,
+  countQualifiedLeads,
+  countClosedLeads,
   leadsPerMonth,
   blogsPerMonth,
   servicesCreatedPerMonth,
@@ -17,7 +20,6 @@ import {
   recentPages,
   recentMedia,
   recentLogins,
-
   countSeoPagesMissingMeta,
   countSeoPagesMissingOgImage,
   getSitemapStatus,
@@ -27,6 +29,7 @@ import {
   countPDFs,
   getUploadTrend
 } from '../repositories/dashboard.repository';
+import mongoose from 'mongoose';
 
 // Quick‑action definitions – adjust URLs if needed
 const quickActions = {
@@ -76,11 +79,14 @@ export const getDashboardData = async (role: string) => {
 
 /** Super Admin – full access */
 const buildSuperAdmin = async () => {
-  const [pages, blogs, services, leads, users, media, activeRedirects, menus] = await Promise.all([
+  const [pages, blogs, services, leads, newLeads, qualifiedLeads, closedLeads, users, media, activeRedirects, menus] = await Promise.all([
     countPages(),
     countBlogs(),
     countServices(),
     countLeads(),
+    countNewLeads(),
+    countQualifiedLeads(),
+    countClosedLeads(),
     countUsers(),
     countMediaFiles(),
     countActiveRedirects(),
@@ -101,11 +107,18 @@ const buildSuperAdmin = async () => {
     recentLogins: await recentLogins(5)
   };
 
+  const systemInfo = {
+    serverStatus: 'Online',
+    databaseStatus: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
+    uptime: process.uptime()
+  };
+
   return {
-    cards: { pages, blogs, services, leads, users, media, activeRedirects, menus },
+    cards: { pages, blogs, services, leads, newLeads, qualifiedLeads, closedLeads, users, media, activeRedirects, menus },
     charts: { monthlyLeads, monthlyBlogs, servicesCreated },
     recentActivities,
-    quickActions: quickActions.SUPER_ADMIN
+    quickActions: quickActions.SUPER_ADMIN,
+    systemInfo
   };
 };
 
@@ -134,9 +147,9 @@ const buildEditor = async () => {
 const buildMarketingManager = async () => {
   const [totalLeads, newLeads, qualifiedLeads, closedLeads, totalBlogs] = await Promise.all([
     countLeads(),
-    countLeads(), // placeholder for new leads count; replace with actual query if exists
-    countLeads(), // placeholder for qualified leads
-    countLeads(), // placeholder for closed leads
+    countNewLeads(),
+    countQualifiedLeads(),
+    countClosedLeads(),
     countBlogs()
   ]);
 

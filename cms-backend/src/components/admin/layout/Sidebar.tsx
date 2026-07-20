@@ -8,9 +8,13 @@ const navItems = [
   { name: 'Pages', href: '/admin/pages', permission: 'MANAGE_PAGES' },
   { name: 'Blogs', href: '/admin/blogs', permission: 'MANAGE_BLOGS' },
   { name: 'Services', href: '/admin/services', permission: 'MANAGE_SERVICES' },
+  { name: 'Leads', href: '/admin/leads', permission: 'MANAGE_LEADS' },
   { name: 'Media Library', href: '/admin/media', permission: 'MANAGE_MEDIA' },
+  { name: 'SEO Settings', href: '/admin/seo', permission: 'MANAGE_SEO' },
+  { name: 'Redirects', href: '/admin/redirects', permission: 'MANAGE_SEO' },
   { name: 'Settings', href: '/admin/settings', permission: 'MANAGE_SETTINGS' },
   { name: 'Users', href: '/admin/users', permission: 'MANAGE_USERS' },
+  { name: 'Roles', href: '/admin/roles', permission: 'SUPER_ADMIN' },
 ];
 
 export default function Sidebar() {

@@ -5,7 +5,7 @@ import {
 import { cn } from '@/utils/cn';
 import { Checkbox } from '../ui/forms/Checkbox';
 import { Pagination } from '../ui/Pagination';
-import { Loader } from '../ui/Loader';
+import { TableSkeleton } from '../ui/TableSkeleton';
 import { EmptyState } from '../ui/EmptyState';
 
 export interface Column<T> {
@@ -32,6 +32,9 @@ interface DataTableProps<T> {
   // Search & Filter
   onSearch?: (query: string) => void;
   searchPlaceholder?: string;
+  filterOptions?: { label: string; value: string }[];
+  filterKey?: string;
+  onFilterChange?: (value: string) => void;
   
   // Sorting
   onSort?: (key: string, direction: 'asc' | 'desc') => void;
@@ -66,6 +69,9 @@ export function DataTable<T>({
   onPageSizeChange,
   onSearch,
   searchPlaceholder = 'Search...',
+  filterOptions = [],
+  filterKey,
+  onFilterChange,
   onSort,
   selectable = false,
   onSelectionChange,
@@ -76,6 +82,7 @@ export function DataTable<T>({
   
   // Internal State for Client-side operations
   const [internalSearch, setInternalSearch] = useState('');
+  const [internalFilter, setInternalFilter] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
   const [internalPage, setInternalPage] = useState(1);
@@ -86,6 +93,14 @@ export function DataTable<T>({
     const val = e.target.value;
     setInternalSearch(val);
     if (onSearch) onSearch(val);
+    if (!serverSidePagination) setInternalPage(1);
+  };
+
+  // Handle Filter
+  const handleFilter = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    setInternalFilter(val);
+    if (onFilterChange) onFilterChange(val);
     if (!serverSidePagination) setInternalPage(1);
   };
 
@@ -160,6 +175,11 @@ export function DataTable<T>({
       );
     }
 
+    // Client Filter
+    if (internalFilter && filterKey && !onFilterChange) {
+      result = result.filter(item => String(item[filterKey as keyof T]) === internalFilter);
+    }
+
     // Client Sort
     if (sortConfig && !onSort) {
       result.sort((a, b) => {
@@ -174,7 +194,7 @@ export function DataTable<T>({
     // Client Pagination
     const startIndex = (internalPage - 1) * internalPageSize;
     return result.slice(startIndex, startIndex + internalPageSize);
-  }, [data, serverSidePagination, internalSearch, sortConfig, internalPage, internalPageSize, onSearch, onSort]);
+  }, [data, serverSidePagination, internalSearch, internalFilter, sortConfig, internalPage, internalPageSize, onSearch, onFilterChange, filterKey, onSort]);
 
   const displayTotal = serverSidePagination ? totalItems : data.length;
   const displayPage = serverSidePagination ? currentPage : internalPage;
@@ -187,16 +207,34 @@ export function DataTable<T>({
       {/* Toolbar */}
       <div className="p-4 border-b border-border flex flex-col sm:flex-row justify-between items-center gap-4 bg-gray-50/50 dark:bg-gray-900/50">
         
-        {/* Search */}
-        <div className="relative w-full sm:max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder={searchPlaceholder}
-            value={internalSearch}
-            onChange={handleSearch}
-            className="w-full pl-9 pr-4 py-2 text-sm border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+        <div className="flex gap-2 w-full sm:max-w-md">
+          {/* Search */}
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder={searchPlaceholder}
+              value={internalSearch}
+              onChange={handleSearch}
+              className="w-full pl-9 pr-4 py-2 text-sm border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+          
+          {/* Filter Options */}
+          {filterOptions && filterOptions.length > 0 && (
+            <div className="w-1/3 min-w-[120px]">
+              <select
+                value={internalFilter}
+                onChange={handleFilter}
+                className="w-full px-3 py-2 text-sm border border-input rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="">All</option>
+                {filterOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         {/* Actions */}
@@ -264,8 +302,8 @@ export function DataTable<T>({
           <tbody className="divide-y divide-border bg-background">
             {isLoading ? (
               <tr>
-                <td colSpan={columns.length + (selectable ? 1 : 0)} className="px-6 py-10">
-                  <Loader type="table" />
+                <td colSpan={columns.length + (selectable ? 1 : 0)} className="p-0">
+                  <TableSkeleton columns={columns.length + (selectable ? 1 : 0)} rows={5} />
                 </td>
               </tr>
             ) : processedData.length === 0 ? (

@@ -85,11 +85,17 @@ export default function BlogsList() {
       key: 'status', 
       label: 'Status', 
       sortable: true,
-      render: (item: BlogDTO) => (
-        <StatusBadge status={item.status === 'PUBLISHED' ? 'success' : 'warning'}>
-          {item.status}
-        </StatusBadge>
-      )
+      render: (item: BlogDTO) => {
+        const isScheduled = item.status === 'PUBLISHED' && new Date(item.publishDate || item.createdAt).getTime() > Date.now();
+        if (isScheduled) {
+          return <StatusBadge status="info">Scheduled</StatusBadge>;
+        }
+        return (
+          <StatusBadge status={item.status === 'PUBLISHED' ? 'success' : 'warning'}>
+            {item.status}
+          </StatusBadge>
+        );
+      }
     },
     { 
       key: 'publishDate', 
@@ -142,7 +148,12 @@ export default function BlogsList() {
             data={blogs}
             columns={columns}
             searchable={true}
-            searchKeys={['title', 'slug', 'authorName']}
+            searchKeys={['title', 'slug']}
+            filterOptions={[
+              { label: 'Published', value: 'PUBLISHED' },
+              { label: 'Draft', value: 'DRAFT' }
+            ]}
+            filterKey="status"
             selectable={true}
             exportable={true}
             exportFileName="blogs-export"

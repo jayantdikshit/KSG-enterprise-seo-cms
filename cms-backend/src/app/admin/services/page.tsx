@@ -133,6 +133,11 @@ export default function ServicesList() {
             columns={columns}
             searchable={true}
             searchKeys={['name', 'slug']}
+            filterOptions={[
+              { label: 'Published', value: 'PUBLISHED' },
+              { label: 'Draft', value: 'DRAFT' }
+            ]}
+            filterKey="status"
             selectable={true}
             exportable={true}
             exportFileName="services-export"

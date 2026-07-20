@@ -12,6 +12,8 @@ import { PaginatedResponse } from '@/types/page.types';
 import { useToast } from '@/components/admin/ui/Toast';
 import Breadcrumb from '@/components/admin/layout/Breadcrumb';
 import { PermissionWrapper } from '@/components/admin/common/PermissionWrapper';
+import { FolderPlus, Folder as FolderIcon } from 'lucide-react';
+import { Input } from '@/components/admin/ui/forms/Input';
 
 export default function MediaLibrary() {
   const { showToast } = useToast();
@@ -22,11 +24,18 @@ export default function MediaLibrary() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [mediaToDelete, setMediaToDelete] = useState<string | null>(null);
+  
+  // Folder states
+  const [folders, setFolders] = useState<{ _id: string; name: string; }[]>([]);
+  const [currentFolder, setCurrentFolder] = useState<string>('uncategorized');
+  const [createFolderModalOpen, setCreateFolderModalOpen] = useState(false);
+  const [newFolderName, setNewFolderName] = useState('');
+  const [creatingFolder, setCreatingFolder] = useState(false);
 
   const fetchMedia = async () => {
     try {
       setLoading(true);
-      const res = await apiCall<PaginatedResponse<MediaDTO>>('/api/media?limit=1000');
+      const res = await apiCall<PaginatedResponse<MediaDTO>>(`/api/media?limit=1000&folder=${currentFolder}`);
       if (res.success) {
         setMediaItems(res.data);
       }
@@ -36,6 +45,21 @@ export default function MediaLibrary() {
       setLoading(false);
     }
   };
+
+  const fetchFolders = async () => {
+    try {
+      const res = await apiCall<{success: boolean; data: any[]}>('/api/media/folders');
+      if (res.success) {
+        setFolders(res.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch folders', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchFolders();
+  }, []);
 
   useEffect(() => {
     fetchMedia();
@@ -47,7 +71,7 @@ export default function MediaLibrary() {
         window.history.replaceState({}, '', window.location.pathname);
       }
     }
-  }, []);
+  }, [currentFolder]);
 
   const handleDeleteClick = (id: string) => {
     setMediaToDelete(id);
@@ -74,32 +98,58 @@ export default function MediaLibrary() {
     
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('file', files[0]); // Only uploading one file at a time for simplicity
-
-      // Custom fetch for multipart/form-data as apiCall normally sets application/json
       const token = localStorage.getItem('accessToken');
-      const response = await fetch('/api/media/upload', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
+      const uploadPromises = files.map(async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('folder', currentFolder);
+        
+        const response = await fetch('/api/media/upload', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message || `Failed to upload ${file.name}`);
+        }
+        return data;
       });
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to upload file');
-      }
+      await Promise.all(uploadPromises);
 
-      showToast('File uploaded successfully', 'success');
+      showToast(`${files.length} file(s) uploaded successfully`, 'success');
       setUploadModalOpen(false);
       fetchMedia();
     } catch (error: any) {
-      showToast(error.message || 'Failed to upload file', 'error');
+      showToast(error.message || 'Failed to upload files', 'error');
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleCreateFolder = async () => {
+    if (!newFolderName.trim()) return;
+    setCreatingFolder(true);
+    try {
+      const res = await apiCall('/api/media/folders', {
+        method: 'POST',
+        body: JSON.stringify({ name: newFolderName.trim() })
+      });
+      if (res.success) {
+        showToast('Folder created successfully', 'success');
+        setCreateFolderModalOpen(false);
+        setNewFolderName('');
+        fetchFolders();
+        setCurrentFolder(newFolderName.trim());
+      }
+    } catch (error: any) {
+      showToast(error.message || 'Failed to create folder', 'error');
+    } finally {
+      setCreatingFolder(false);
     }
   };
 
@@ -174,13 +224,51 @@ export default function MediaLibrary() {
             <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Media Library</h1>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage all your uploaded images and files.</p>
           </div>
-          <button 
-            onClick={() => setUploadModalOpen(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-900 transition-colors"
+          <div className="flex space-x-3">
+            <button 
+              onClick={() => setCreateFolderModalOpen(true)}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-900 transition-colors"
+            >
+              <FolderPlus className="w-4 h-4 mr-2" />
+              New Folder
+            </button>
+            <button 
+              onClick={() => setUploadModalOpen(true)}
+              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-900 transition-colors"
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Upload File
+            </button>
+          </div>
+        </div>
+
+        {/* Folders Navigation */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2">
+          <button
+            onClick={() => setCurrentFolder('uncategorized')}
+            className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+              currentFolder === 'uncategorized'
+                ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+            }`}
           >
-            <Upload className="w-4 h-4 mr-2" />
-            Upload File
+            <FolderIcon className="w-4 h-4 mr-2" />
+            Uncategorized
           </button>
+          {folders.map(folder => (
+            <button
+              key={folder._id}
+              onClick={() => setCurrentFolder(folder.name)}
+              className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap ${
+                currentFolder === folder.name
+                  ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+              }`}
+            >
+              <FolderIcon className="w-4 h-4 mr-2" />
+              {folder.name}
+            </button>
+          ))}
         </div>
 
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg border border-gray-200 dark:border-gray-700">
@@ -219,7 +307,7 @@ export default function MediaLibrary() {
           <div className="relative">
             <ImageUpload 
               onUpload={handleUpload}
-              multiple={false}
+              multiple={true}
               maxSizeMB={5}
             />
             {uploading && (
@@ -230,6 +318,39 @@ export default function MediaLibrary() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      </Modal>
+
+      {/* Create Folder Modal */}
+      <Modal
+        isOpen={createFolderModalOpen}
+        onClose={() => setCreateFolderModalOpen(false)}
+        title="Create New Folder"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <Input 
+            label="Folder Name"
+            placeholder="e.g. blog-images"
+            value={newFolderName}
+            onChange={(e) => setNewFolderName(e.target.value)}
+          />
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700 mt-4">
+            <button
+              onClick={() => setCreateFolderModalOpen(false)}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleCreateFolder}
+              disabled={creatingFolder || !newFolderName.trim()}
+              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors inline-flex items-center"
+            >
+              {creatingFolder && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Create Folder
+            </button>
           </div>
         </div>
       </Modal>

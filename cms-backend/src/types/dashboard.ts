@@ -3,6 +3,12 @@ export interface DashboardQuickAction {
   href: string;
 }
 
+export interface SystemInfo {
+  serverStatus: string;
+  databaseStatus: string;
+  uptime: number;
+}
+
 export interface DashboardCards {
   pages?: number;
   blogs?: number;
@@ -71,5 +77,6 @@ export interface DashboardResponse {
   recentActivities?: DashboardRecentActivities;
   recent?: DashboardRecentActivities; // Editor role uses 'recent'
   quickActions?: DashboardQuickAction[];
+  systemInfo?: SystemInfo;
   error?: string;
 }

@@ -10,6 +10,10 @@ import {
   DashboardRecentActivities,
   RecentActivityItem 
 } from '@/types/dashboard';
+import { DashboardCharts } from '@/components/admin/dashboard/DashboardCharts';
+import { SystemInfoWidget } from '@/components/admin/dashboard/SystemInfoWidget';
+import { EmptyState } from '@/components/admin/ui/EmptyState';
+import { Activity } from 'lucide-react';
 
 const SkeletonCard = () => (
   <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 animate-pulse">
@@ -31,10 +35,10 @@ const SkeletonTable = () => (
 );
 
 const StatCard = React.memo(({ title, value, label }: { title: string, value: string | number, label?: string }) => (
-  <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 transition-transform hover:scale-[1.02]">
-    <h2 className="font-semibold mb-2 text-gray-700 dark:text-gray-200">{title}</h2>
-    <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{value}</p>
-    {label && <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{label}</p>}
+  <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl shadow-sm hover:shadow-xl p-6 transition-all duration-300 hover:-translate-y-1 border border-gray-100 dark:border-gray-700/50">
+    <h2 className="font-medium text-sm text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">{title}</h2>
+    <p className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">{value}</p>
+    {label && <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">{label}</p>}
   </div>
 ));
 StatCard.displayName = 'StatCard';
@@ -42,9 +46,9 @@ StatCard.displayName = 'StatCard';
 const ActivityList = React.memo(({ title, items, type }: { title: string, items?: RecentActivityItem[], type: 'page' | 'blog' | 'lead' | 'media' | 'login' }) => {
   if (!items || items.length === 0) return null;
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 overflow-hidden">
-      <h2 className="font-semibold mb-4 text-gray-800 dark:text-gray-100">{title}</h2>
-      <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+    <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700/50 p-6 overflow-hidden">
+      <h2 className="font-semibold text-lg mb-4 text-gray-800 dark:text-gray-100 flex items-center"><Activity className="w-5 h-5 mr-2 text-indigo-500"/> {title}</h2>
+      <ul className="divide-y divide-gray-100 dark:divide-gray-800">
         {items.map(item => (
           <li key={item._id} className="py-3 flex justify-between items-center">
             <div>
@@ -202,6 +206,13 @@ export default function DashboardPage() {
         {renderCards}
       </div>
 
+      {data?.charts && (
+        <DashboardCharts 
+          monthlyLeads={data.charts.monthlyLeads} 
+          monthlyBlogs={data.charts.monthlyBlogs} 
+        />
+      )}
+
       {recent && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityList title="Recent Pages" items={recent.recentPages} type="page" />
@@ -212,10 +223,22 @@ export default function DashboardPage() {
         </div>
       )}
       
+      {data?.systemInfo && (
+        <SystemInfoWidget 
+          systemInfo={data.systemInfo} 
+          userEmail={user?.email || 'Unknown'} 
+          role={data.role} 
+        />
+      )}
+
       {/* Fallback for empty activities */}
       {recent && Object.values(recent).every(arr => !arr || arr.length === 0) && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-8 text-center text-gray-500 dark:text-gray-400">
-          No recent activity found.
+        <div className="mt-8">
+          <EmptyState 
+            title="No Recent Activity" 
+            description="Your dashboard is quiet. Check back later when users interact with the CMS." 
+            icon={<Activity className="w-8 h-8 text-indigo-500" />} 
+          />
         </div>
       )}
     </div>

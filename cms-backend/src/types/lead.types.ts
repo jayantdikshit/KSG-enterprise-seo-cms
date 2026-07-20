@@ -14,6 +14,11 @@ export interface UpdateLeadDTO {
   companyName?: string;
   message?: string;
   status?: "NEW" | "CONTACTED" | "QUALIFIED" | "CLOSED";
+  notes?: {
+    content: string;
+    author: string;
+    createdAt?: string;
+  }[];
 }
 
 export interface LeadDTO {
@@ -24,6 +29,11 @@ export interface LeadDTO {
   companyName: string;
   message: string;
   status: "NEW" | "CONTACTED" | "QUALIFIED" | "CLOSED";
+  notes?: {
+    content: string;
+    author: string;
+    createdAt: string;
+  }[];
   ipAddress: string;
   userAgent: string;
   createdAt: string;

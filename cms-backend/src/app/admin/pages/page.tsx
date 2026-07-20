@@ -134,6 +134,11 @@ export default function PagesList() {
             columns={columns}
             searchable={true}
             searchKeys={['title', 'slug']}
+            filterOptions={[
+              { label: 'Published', value: 'PUBLISHED' },
+              { label: 'Draft', value: 'DRAFT' }
+            ]}
+            filterKey="status"
             selectable={true}
             exportable={true}
             exportFileName="pages-export"

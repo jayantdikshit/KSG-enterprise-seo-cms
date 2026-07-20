@@ -41,6 +41,13 @@ const LeadSchema = new mongoose.Schema(
       type: String,
       default: "unknown",
     },
+    notes: [
+      {
+        content: { type: String, required: true },
+        author: { type: String, required: true },
+        createdAt: { type: Date, default: Date.now }
+      }
+    ]
   },
   { timestamps: true }
 );

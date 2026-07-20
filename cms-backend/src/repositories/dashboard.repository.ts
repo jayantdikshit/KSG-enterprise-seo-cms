@@ -78,14 +78,9 @@ export const getUploadTrend = async () =>
     { $sort: { _id: 1 } }
   ]);
 // Additional marketing manager helpers
-export const countNewLeads = async () => {
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-  return Lead.countDocuments({ createdAt: { $gte: thirtyDaysAgo } });
-};
-
-export const countQualifiedLeads = async () => Lead.countDocuments({ status: 'qualified' });
-export const countClosedLeads = async () => Lead.countDocuments({ status: 'closed' });
+export const countNewLeads = async () => Lead.countDocuments({ status: 'NEW' });
+export const countQualifiedLeads = async () => Lead.countDocuments({ status: 'QUALIFIED' });
+export const countClosedLeads = async () => Lead.countDocuments({ status: 'CLOSED' });
 
 export const leadStatusChart = async () =>
   Lead.aggregate([
