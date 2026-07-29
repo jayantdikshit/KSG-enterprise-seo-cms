@@ -1,4 +1,4 @@
-// middleware.ts – protects admin routes
+// middleware.ts – protects admin routes, allows public website routes
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
@@ -26,7 +26,18 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // If the request is for a public path, just continue
+  // Public API routes — no auth needed (for public website data fetching)
+  if (pathname.startsWith('/api/public')) {
+    return NextResponse.next();
+  }
+
+  // Public website routes — no auth needed
+  // Everything that is NOT /admin or /api is a public website page
+  if (!pathname.startsWith('/admin') && !pathname.startsWith('/api')) {
+    return NextResponse.next();
+  }
+
+  // If the request is for a public path (admin login, auth APIs), just continue
   if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
     return NextResponse.next();
   }
@@ -44,7 +55,7 @@ export function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Apply middleware only to admin pages and API routes (exclude static files)
+// Apply middleware to all routes (public routes are handled above with early returns)
 export const config = {
-  matcher: ['/admin/:path*', '/api/:path*'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 };

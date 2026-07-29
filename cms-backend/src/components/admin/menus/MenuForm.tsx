@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { useForm, useFieldArray, useWatch } from 'react-hook-form';
 import { Save, ArrowLeft, Loader2, Plus, Trash2, GripVertical } from 'lucide-react';
 import Link from 'next/link';
 
@@ -22,16 +22,55 @@ export default function MenuForm({ initialData, isEdit = false }: MenuFormProps)
   const router = useRouter();
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [pagesList, setPagesList] = useState<{label: string, value: string}[]>([]);
+  const [servicesList, setServicesList] = useState<{label: string, value: string}[]>([]);
+
+  useEffect(() => {
+    const fetchDropdownData = async () => {
+      try {
+        const [pagesRes, servicesRes] = await Promise.all([
+          apiCall('/api/pages'),
+          apiCall('/api/services')
+        ]);
+        
+        if (pagesRes.success && pagesRes.data) {
+          setPagesList([
+            { label: 'Select Page...', value: '' },
+            ...pagesRes.data.map((p: any) => ({ label: p.title, value: p._id }))
+          ]);
+        }
+        
+        if (servicesRes.success && servicesRes.data) {
+          setServicesList([
+            { label: 'Select Service...', value: '' },
+            ...servicesRes.data.map((s: any) => ({ label: s.name, value: s._id }))
+          ]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch dropdown data:", error);
+      }
+    };
+    fetchDropdownData();
+  }, []);
 
   const { register, handleSubmit, control, formState: { errors } } = useForm<CreateMenuDTO>({
     defaultValues: {
       name: initialData?.name || '',
       location: initialData?.location || '',
-      items: initialData?.items?.length ? initialData.items : [],
+      items: initialData?.items?.length ? initialData.items.map((item: any) => ({
+        ...item,
+        pageId: item.pageId?._id || item.pageId || '',
+        serviceId: item.serviceId?._id || item.serviceId || ''
+      })) : [],
     }
   });
 
   const { fields, append, remove, move } = useFieldArray({
+    control,
+    name: "items"
+  });
+
+  const watchedItems = useWatch({
     control,
     name: "items"
   });
@@ -42,10 +81,22 @@ export default function MenuForm({ initialData, isEdit = false }: MenuFormProps)
       
       // Basic formatting cleanup before sending
       if (data.items) {
-        data.items = data.items.map((item, index) => ({
-          ...item,
-          order: index
-        }));
+        data.items = data.items.map((item: any, index) => {
+          let cleanItem = { ...item, order: index };
+          
+          // Cleanup unused reference fields based on type
+          if (cleanItem.type === 'PAGE') {
+            cleanItem.url = '';
+            cleanItem.serviceId = null;
+          } else if (cleanItem.type === 'SERVICE') {
+            cleanItem.url = '';
+            cleanItem.pageId = null;
+          } else {
+            cleanItem.pageId = null;
+            cleanItem.serviceId = null;
+          }
+          return cleanItem;
+        });
       }
 
       const url = isEdit ? `/api/menus/${initialData?._id}` : '/api/menus';
@@ -143,57 +194,77 @@ export default function MenuForm({ initialData, isEdit = false }: MenuFormProps)
             </div>
             
             <div className="space-y-4">
-              {fields.map((item, index) => (
-                <div key={item.id} className="flex gap-4 items-start p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700">
-                  <div className="flex flex-col gap-2 mt-2">
-                    <button type="button" onClick={() => index > 0 && move(index, index - 1)} disabled={index === 0} className="text-gray-400 hover:text-gray-700 disabled:opacity-30">
-                      ↑
-                    </button>
-                    <GripVertical className="w-5 h-5 text-gray-400" />
-                    <button type="button" onClick={() => index < fields.length - 1 && move(index, index + 1)} disabled={index === fields.length - 1} className="text-gray-400 hover:text-gray-700 disabled:opacity-30">
-                      ↓
-                    </button>
-                  </div>
-                  
-                  <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-4">
-                    <div className="md:col-span-4">
-                      <Input
-                        label="Label"
-                        placeholder="Link text"
-                        {...register(`items.${index}.label` as const, { required: 'Required' })}
-                        error={errors.items?.[index]?.label?.message}
-                      />
+              {fields.map((item, index) => {
+                const currentType = watchedItems?.[index]?.type || 'EXTERNAL';
+                
+                return (
+                  <div key={item.id} className="flex gap-4 items-start p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <div className="flex flex-col gap-2 mt-2">
+                      <button type="button" onClick={() => index > 0 && move(index, index - 1)} disabled={index === 0} className="text-gray-400 hover:text-gray-700 disabled:opacity-30">
+                        ↑
+                      </button>
+                      <GripVertical className="w-5 h-5 text-gray-400" />
+                      <button type="button" onClick={() => index < fields.length - 1 && move(index, index + 1)} disabled={index === fields.length - 1} className="text-gray-400 hover:text-gray-700 disabled:opacity-30">
+                        ↓
+                      </button>
                     </div>
-                    <div className="md:col-span-3">
-                      <Select
-                        label="Type"
-                        {...register(`items.${index}.type` as const)}
-                        options={[
-                          { label: 'Custom URL', value: 'EXTERNAL' },
-                          { label: 'Page', value: 'PAGE' },
-                          { label: 'Service', value: 'SERVICE' },
-                        ]}
-                      />
+                    
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-4">
+                      <div className="md:col-span-4">
+                        <Input
+                          label="Label"
+                          placeholder="Link text"
+                          {...register(`items.${index}.label` as const, { required: 'Required' })}
+                          error={errors.items?.[index]?.label?.message}
+                        />
+                      </div>
+                      <div className="md:col-span-3">
+                        <Select
+                          label="Type"
+                          {...register(`items.${index}.type` as const)}
+                          options={[
+                            { label: 'Custom URL', value: 'EXTERNAL' },
+                            { label: 'Page', value: 'PAGE' },
+                            { label: 'Service', value: 'SERVICE' },
+                          ]}
+                        />
+                      </div>
+                      <div className="md:col-span-5">
+                        {currentType === 'PAGE' && (
+                          <Select
+                            label="Select Page"
+                            {...register(`items.${index}.pageId` as const)}
+                            options={pagesList}
+                          />
+                        )}
+                        {currentType === 'SERVICE' && (
+                          <Select
+                            label="Select Service"
+                            {...register(`items.${index}.serviceId` as const)}
+                            options={servicesList}
+                          />
+                        )}
+                        {(currentType === 'EXTERNAL' || currentType === 'CUSTOM') && (
+                          <Input
+                            label="URL"
+                            placeholder="https://... or /path"
+                            {...register(`items.${index}.url` as const)}
+                          />
+                        )}
+                      </div>
                     </div>
-                    <div className="md:col-span-5">
-                      <Input
-                        label="URL / Resource ID"
-                        placeholder="https://... or /path"
-                        {...register(`items.${index}.url` as const)}
-                      />
-                    </div>
-                  </div>
 
-                  <button
-                    type="button"
-                    onClick={() => remove(index)}
-                    className="p-2 mt-6 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
-                    title="Remove item"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                </div>
-              ))}
+                    <button
+                      type="button"
+                      onClick={() => remove(index)}
+                      className="p-2 mt-6 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                      title="Remove item"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                );
+              })}
 
               {fields.length === 0 && (
                 <div className="text-center py-12 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg">

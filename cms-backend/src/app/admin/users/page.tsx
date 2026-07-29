@@ -12,9 +12,11 @@ import { RoleDTO } from '@/types/role.types';
 import { useToast } from '@/components/admin/ui/Toast';
 import Breadcrumb from '@/components/admin/layout/Breadcrumb';
 import { PermissionWrapper } from '@/components/admin/common/PermissionWrapper';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function UsersPage() {
   const { showToast } = useToast();
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [roles, setRoles] = useState<RoleDTO[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,6 +80,24 @@ export default function UsersPage() {
     }
   };
 
+  const handleRoleChange = async (userId: string, newRoleId: string) => {
+    try {
+      setLoading(true);
+      const res = await apiCall(`/api/users/${userId}`, {
+        method: 'PUT',
+        body: { roleId: newRoleId }
+      });
+      if (res.success) {
+        showToast('Role updated successfully', 'success');
+        fetchData();
+      }
+    } catch (error: any) {
+      showToast(error.message || 'Failed to update role', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const columns: Column<UserDTO>[] = useMemo(() => [
     { 
       title: 'Name', 
@@ -101,6 +121,25 @@ export default function UsersPage() {
         const roleObj = item.role;
         const roleName = typeof roleObj === 'object' && roleObj !== null ? roleObj.name : (typeof roleObj === 'string' ? roleObj : 'No Role');
         const displayRole = roleName ? roleName.replace('_', ' ') : 'No Role';
+        
+        const isSuperAdmin = currentUser?.role?.name === 'SUPER_ADMIN' || currentUser?.role === 'SUPER_ADMIN';
+
+        if (isSuperAdmin) {
+          const currentRoleId = typeof roleObj === 'object' && roleObj !== null ? roleObj._id : '';
+          return (
+            <select
+              value={currentRoleId}
+              onChange={(e) => handleRoleChange(item._id, e.target.value)}
+              className="block w-full max-w-[150px] px-2 py-1 text-xs text-gray-900 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-indigo-500 dark:focus:border-indigo-500"
+            >
+              <option value="">Select Role</option>
+              {roles.map(r => (
+                <option key={r._id} value={r._id}>{r.name.replace('_', ' ')}</option>
+              ))}
+            </select>
+          );
+        }
+
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
             {displayRole}
@@ -129,7 +168,7 @@ export default function UsersPage() {
         </div>
       )
     }
-  ], []);
+  ], [currentUser, roles]);
 
   return (
     <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 pb-12">

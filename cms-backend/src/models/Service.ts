@@ -1,5 +1,36 @@
 import mongoose from "mongoose";
 
+const WhyChooseUsCardSchema = new mongoose.Schema({
+  icon: { type: String, default: "", trim: true },
+  title: { type: String, default: "", trim: true },
+  description: { type: String, default: "", trim: true },
+  order: { type: Number, default: 0 },
+});
+
+const WhyChooseUsSchema = new mongoose.Schema({
+  heading: { type: String, default: "", trim: true },
+  subheading: { type: String, default: "", trim: true },
+  cards: { type: [WhyChooseUsCardSchema], default: [] },
+});
+
+const TestimonialSchema = new mongoose.Schema({
+  customerName: { type: String, default: "", trim: true },
+  designation: { type: String, default: "", trim: true },
+  company: { type: String, default: "", trim: true },
+  image: { type: String, default: "", trim: true },
+  rating: { type: Number, default: 5, min: 1, max: 5 },
+  review: { type: String, default: "", trim: true },
+  order: { type: Number, default: 0 },
+});
+
+const ContactCTASchema = new mongoose.Schema({
+  heading: { type: String, default: "", trim: true },
+  description: { type: String, default: "", trim: true },
+  buttonText: { type: String, default: "", trim: true },
+  buttonUrl: { type: String, default: "", trim: true },
+  backgroundImage: { type: String, default: "", trim: true },
+});
+
 const ServiceSchema = new mongoose.Schema(
   {
     name: {
@@ -56,20 +87,24 @@ const ServiceSchema = new mongoose.Schema(
       default: [],
     },
 
+    // Old CTA fields (kept for backward compatibility if used)
     ctaTitle: {
       type: String,
       default: "",
     },
-
     ctaButtonText: {
       type: String,
       default: "",
     },
-
     ctaButtonUrl: {
       type: String,
       default: "",
     },
+
+    // New Structured Fields
+    whyChooseUs: { type: WhyChooseUsSchema, default: () => ({}) },
+    testimonials: { type: [TestimonialSchema], default: [] },
+    contactCTA: { type: ContactCTASchema, default: () => ({}) },
 
     status: {
       type: String,

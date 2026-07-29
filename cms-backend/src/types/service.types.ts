@@ -1,3 +1,5 @@
+import { IWhyChooseUs, ITestimonial, IContactCTA } from './homepage.types';
+
 export interface FaqItem {
   question: string;
   answer: string;
@@ -16,6 +18,9 @@ export interface CreateServiceDTO {
   ctaTitle?: string;
   ctaButtonText?: string;
   ctaButtonUrl?: string;
+  whyChooseUs?: IWhyChooseUs;
+  testimonials?: ITestimonial[];
+  contactCTA?: IContactCTA;
   status?: "DRAFT" | "PUBLISHED";
   seoTitle?: string;
   metaDescription?: string;
@@ -42,6 +47,9 @@ export interface UpdateServiceDTO {
   ctaTitle?: string;
   ctaButtonText?: string;
   ctaButtonUrl?: string;
+  whyChooseUs?: IWhyChooseUs;
+  testimonials?: ITestimonial[];
+  contactCTA?: IContactCTA;
   status?: "DRAFT" | "PUBLISHED";
   seoTitle?: string;
   metaDescription?: string;
@@ -69,6 +77,9 @@ export interface ServiceDTO {
   ctaTitle: string;
   ctaButtonText: string;
   ctaButtonUrl: string;
+  whyChooseUs?: IWhyChooseUs;
+  testimonials?: ITestimonial[];
+  contactCTA?: IContactCTA;
   status: "DRAFT" | "PUBLISHED";
   seoTitle?: string;
   metaDescription?: string;

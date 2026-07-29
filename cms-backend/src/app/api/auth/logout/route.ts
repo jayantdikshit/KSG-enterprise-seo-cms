@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import User from "@/models/User";
 import { connectDB } from "@/lib/mongodb";
 import { verifyAccessToken, verifyRefreshToken } from "@/utils/jwt";
@@ -8,7 +8,7 @@ type UserDocument = {
   save: () => Promise<unknown>;
 } & Record<string, unknown>;
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json().catch(() => ({}));
 

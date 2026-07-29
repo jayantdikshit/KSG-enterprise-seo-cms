@@ -48,9 +48,9 @@ export const POST = withApiAuth(async (request: NextRequest) => {
       password: hashedPassword,
       role: roleId,
       isActive: isActive !== undefined ? isActive : true
-    });
+    } as any);
 
-    const userObj = newUser.toObject();
+    const userObj: any = newUser.toObject();
     delete userObj.password;
 
     return NextResponse.json({ success: true, data: userObj }, { status: 201 });

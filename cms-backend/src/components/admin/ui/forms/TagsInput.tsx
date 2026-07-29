@@ -13,7 +13,7 @@ export interface TagsInputProps {
 }
 
 export const TagsInput = forwardRef<HTMLInputElement, TagsInputProps>(
-  ({ label, error, helperText, value: tags = [], onChange, placeholder = 'Add tag...', className }, ref) => {
+  ({ label, error, helperText, value: tags = [], onChange, placeholder = 'Type and click Add', className }, ref) => {
     const [inputValue, setInputValue] = useState('');
 
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -71,6 +71,19 @@ export const TagsInput = forwardRef<HTMLInputElement, TagsInputProps>(
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
           />
+          <button
+            type="button"
+            onClick={() => {
+              const newTag = inputValue.trim().replace(/^,+|,+$/g, '');
+              if (newTag && !tags.includes(newTag)) {
+                onChange([...tags, newTag]);
+                setInputValue('');
+              }
+            }}
+            className="ml-auto text-xs bg-indigo-100 hover:bg-indigo-200 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 dark:hover:bg-indigo-800/50 px-2 py-1 rounded font-medium transition-colors"
+          >
+            Add
+          </button>
         </div>
         {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
         {helperText && !error && <p className="mt-1 text-sm text-gray-500">{helperText}</p>}

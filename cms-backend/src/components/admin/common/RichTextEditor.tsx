@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -16,7 +16,8 @@ import {
 } from 'lucide-react';
 
 interface RichTextEditorProps {
-  content: string;
+  content?: string;
+  value?: string;
   onChange: (html: string) => void;
   className?: string;
   placeholder?: string;
@@ -24,9 +25,12 @@ interface RichTextEditorProps {
 
 export const RichTextEditor: React.FC<RichTextEditorProps> = ({ 
   content, 
+  value,
   onChange, 
   className 
 }) => {
+  const initialContent = value || content || '';
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -38,7 +42,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       TableHeader,
       TableCell,
     ],
-    content,
+    content: initialContent,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },
@@ -48,6 +52,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
       },
     },
   });
+
+  useEffect(() => {
+    if (editor && value !== undefined && editor.getHTML() !== value) {
+      editor.commands.setContent(value);
+    }
+  }, [value, editor]);
 
   if (!editor) {
     return null;

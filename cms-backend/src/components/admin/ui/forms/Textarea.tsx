@@ -5,11 +5,13 @@ export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextArea
   label?: string;
   error?: string;
   helperText?: string;
+  hint?: string;
 }
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, label, error, helperText, id, ...props }, ref) => {
+  ({ className, label, error, helperText, hint, id, ...props }, ref) => {
     const textareaId = id || React.useId();
+    const displayHelperText = helperText || hint;
 
     return (
       <div className="w-full">
@@ -29,7 +31,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           {...props}
         />
         {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
-        {helperText && !error && <p className="mt-1 text-sm text-gray-500">{helperText}</p>}
+        {displayHelperText && !error && <p className="mt-1 text-sm text-gray-500">{displayHelperText}</p>}
       </div>
     );
   }

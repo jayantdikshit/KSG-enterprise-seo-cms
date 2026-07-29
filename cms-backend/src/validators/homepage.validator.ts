@@ -74,36 +74,36 @@ const servicesBaseSchema = z.object({
   showSection: z.boolean().optional(),
 });
 
-const whyChooseUsCardBaseSchema = z.object({
+export const whyChooseUsCardBaseSchema = z.object({
   icon: z.string().optional(),
   title: z.string().optional(),
   description: z.string().optional(),
-  order: z.number().int().optional(),
+  order: z.coerce.number().int().optional(),
 });
 
-const whyChooseUsBaseSchema = z.object({
+export const whyChooseUsBaseSchema = z.object({
   heading: z.string().optional(),
   subheading: z.string().optional(),
   cards: z.array(whyChooseUsCardBaseSchema).optional(),
 });
 
-const testimonialBaseSchema = z.object({
+export const testimonialBaseSchema = z.object({
   customerName: z.string().optional(),
   designation: z.string().optional(),
   company: z.string().optional(),
   image: z.string().optional(),
-  rating: z.number().min(1, "Rating must be at least 1").max(5, "Rating cannot exceed 5").optional(),
+  rating: z.coerce.number().min(1, "Rating must be at least 1").max(5, "Rating cannot exceed 5").optional(),
   review: z.string().optional(),
-  order: z.number().int().optional(),
+  order: z.coerce.number().int().optional(),
 });
 
-const faqBaseSchema = z.object({
+export const faqBaseSchema = z.object({
   question: z.string().min(1, "FAQ question cannot be empty"),
   answer: z.string().optional(),
-  order: z.number().int().optional(),
+  order: z.coerce.number().int().optional(),
 });
 
-const contactCTABaseSchema = z.object({
+export const contactCTABaseSchema = z.object({
   heading: z.string().optional(),
   description: z.string().optional(),
   buttonText: z.string().optional(),
@@ -215,7 +215,7 @@ const whyChooseUsCardCreateSchema = z.object({
   icon: z.string().optional().default(""),
   title: z.string().optional().default(""),
   description: z.string().optional().default(""),
-  order: z.number().int().optional().default(0),
+  order: z.coerce.number().int().optional().default(0),
 });
 
 const whyChooseUsCreateSchema = z
@@ -232,15 +232,15 @@ const testimonialCreateSchema = z.object({
   designation: z.string().optional().default(""),
   company: z.string().optional().default(""),
   image: z.string().optional().default(""),
-  rating: z.number().min(1, "Rating must be at least 1").max(5, "Rating cannot exceed 5").optional().default(5),
+  rating: z.coerce.number().min(1, "Rating must be at least 1").max(5, "Rating cannot exceed 5").optional().default(5),
   review: z.string().optional().default(""),
-  order: z.number().int().optional().default(0),
+  order: z.coerce.number().int().optional().default(0),
 });
 
 const faqCreateSchema = z.object({
   question: z.string().min(1, "FAQ question cannot be empty"),
   answer: z.string().optional().default(""),
-  order: z.number().int().optional().default(0),
+  order: z.coerce.number().int().optional().default(0),
 });
 
 const contactCTACreateSchema = z

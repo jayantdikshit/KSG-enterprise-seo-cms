@@ -9,6 +9,7 @@ import {
   convertImageBufferToWebp,
   deleteMediaFiles,
   getFileType,
+  getImageDimensions,
   saveBufferToUpload,
 } from "../utils/storage";
 
@@ -37,16 +38,8 @@ export class MediaService {
       throw new Error("Media file already exists");
     }
 
-    // Get dimensions
-    let width: number | undefined;
-    let height: number | undefined;
-    try {
-      const dimensions = await sharp(buffer).metadata();
-      width = dimensions.width;
-      height = dimensions.height;
-    } catch (e) {
-      console.warn("Failed to read image dimensions:", e);
-    }
+    // Get dimensions (safely handles missing/broken sharp)
+    const { width, height } = await getImageDimensions(buffer);
 
     // Compress & Save original image
     const url = await saveBufferToUpload(buffer, normalizedFileName, "IMAGE");

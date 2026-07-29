@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, Controller, useFieldArray } from 'react-hook-form';
-import { Save, ArrowLeft, Loader2, Plus, Trash2, Image as ImageIcon } from 'lucide-react';
+import { Save, ArrowLeft, Loader2, Plus, Trash2, GripVertical, Image as ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 
 import { Input } from '@/components/admin/ui/forms/Input';
@@ -29,7 +29,7 @@ export default function ServiceForm({ initialData, isEdit = false }: ServiceForm
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
-  const [activeMediaField, setActiveMediaField] = useState<'featuredImage' | 'bannerImage' | null>(null);
+  const [activeMediaField, setActiveMediaField] = useState<any>(null);
 
   const { register, handleSubmit, control, watch, setValue, formState: { errors } } = useForm<CreateServiceDTO>({
     defaultValues: {
@@ -42,6 +42,9 @@ export default function ServiceForm({ initialData, isEdit = false }: ServiceForm
       keyFeatures: initialData?.keyFeatures || [],
       benefits: initialData?.benefits || [],
       faq: initialData?.faq && initialData.faq.length > 0 ? initialData.faq : [{ question: '', answer: '' }],
+      whyChooseUs: initialData?.whyChooseUs || { heading: '', subheading: '', cards: [] },
+      testimonials: initialData?.testimonials || [],
+      contactCTA: initialData?.contactCTA || { heading: '', description: '', buttonText: '', buttonUrl: '', backgroundImage: '' },
       ctaTitle: initialData?.ctaTitle || '',
       ctaButtonText: initialData?.ctaButtonText || '',
       ctaButtonUrl: initialData?.ctaButtonUrl || '',
@@ -61,9 +64,19 @@ export default function ServiceForm({ initialData, isEdit = false }: ServiceForm
     }
   });
 
-  const { fields: faqFields, append: appendFaq, remove: removeFaq } = useFieldArray({
+  const { fields: faqFields, append: appendFaq, remove: removeFaq, move: moveFaq } = useFieldArray({
     control,
     name: "faq"
+  });
+
+  const { fields: whyChooseUsFields, append: appendWhyChooseUs, remove: removeWhyChooseUs, move: moveWhyChooseUs } = useFieldArray({
+    control,
+    name: "whyChooseUs.cards"
+  });
+  
+  const { fields: testimonialFields, append: appendTestimonial, remove: removeTestimonial, move: moveTestimonial } = useFieldArray({
+    control,
+    name: "testimonials"
   });
 
   const generateSlug = () => {
@@ -113,6 +126,12 @@ export default function ServiceForm({ initialData, isEdit = false }: ServiceForm
       // Filter out empty FAQs
       if (data.faq) {
         data.faq = data.faq.filter(f => f.question.trim() !== '' && f.answer.trim() !== '');
+      }
+      if (data.whyChooseUs?.cards) {
+         data.whyChooseUs.cards = data.whyChooseUs.cards.map((c, i) => ({...c, order: i}));
+      }
+      if (data.testimonials) {
+         data.testimonials = data.testimonials.map((c, i) => ({...c, order: i}));
       }
 
       const url = isEdit ? `/api/services/${initialData?._id}` : '/api/services';
@@ -208,7 +227,7 @@ export default function ServiceForm({ initialData, isEdit = false }: ServiceForm
 
               <div className="md:col-span-2 space-y-4">
                 <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-                  <div className="flex justify-between items-center mb-2">
+                  <div className="flex justify-between items-center mb-4">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Featured Image</label>
                     <button
                       type="button"
@@ -220,6 +239,12 @@ export default function ServiceForm({ initialData, isEdit = false }: ServiceForm
                     >
                       Select from Media Library
                     </button>
+                  </div>
+                  <div className="mb-4">
+                    <Input
+                      placeholder="Or paste image URL here..."
+                      {...register('featuredImage')}
+                    />
                   </div>
                   {watch('featuredImage') && (
                     <div className="mb-4 relative w-full max-w-md h-48 rounded-lg overflow-hidden border border-gray-200">
@@ -254,7 +279,7 @@ export default function ServiceForm({ initialData, isEdit = false }: ServiceForm
                 </div>
                 
                 <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-                  <div className="flex justify-between items-center mb-2">
+                  <div className="flex justify-between items-center mb-4">
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Banner Image</label>
                     <button
                       type="button"
@@ -266,6 +291,12 @@ export default function ServiceForm({ initialData, isEdit = false }: ServiceForm
                     >
                       Select from Media Library
                     </button>
+                  </div>
+                  <div className="mb-4">
+                    <Input
+                      placeholder="Or paste image URL here..."
+                      {...register('bannerImage')}
+                    />
                   </div>
                   {watch('bannerImage') && (
                     <div className="mb-4 relative w-full max-w-md h-48 rounded-lg overflow-hidden border border-gray-200">
@@ -325,7 +356,7 @@ export default function ServiceForm({ initialData, isEdit = false }: ServiceForm
                 render={({ field }) => (
                   <TagsInput
                     label="Key Features"
-                    placeholder="Type a feature and press Enter"
+                    placeholder="Type a feature and click Add"
                     value={field.value || []}
                     onChange={field.onChange}
                   />
@@ -337,7 +368,7 @@ export default function ServiceForm({ initialData, isEdit = false }: ServiceForm
                 render={({ field }) => (
                   <TagsInput
                     label="Benefits"
-                    placeholder="Type a benefit and press Enter"
+                    placeholder="Type a benefit and click Add"
                     value={field.value || []}
                     onChange={field.onChange}
                   />
@@ -438,7 +469,118 @@ export default function ServiceForm({ initialData, isEdit = false }: ServiceForm
             </div>
           </div>
 
-          {/* SEO Integration */}
+          
+          {/* Why Choose Us */}
+          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
+              <div>
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white">Why Choose Us Section</h2>
+              </div>
+              <button type="button" onClick={() => appendWhyChooseUs({ title: '', description: '', icon: '' })} className="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center">
+                <Plus className="w-4 h-4 mr-1" /> Add Card
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <Input label="Heading" {...register('whyChooseUs.heading')} placeholder="e.g. Why Choose Us?" />
+              <Input label="Subheading" {...register('whyChooseUs.subheading')} placeholder="e.g. Reasons to work with us" />
+            </div>
+            
+            <div className="space-y-4">
+              {whyChooseUsFields.map((item, index) => (
+                <div key={item.id} className="flex gap-4 items-start p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 relative">
+                  <div className="flex flex-col gap-2 mt-2">
+                    <button type="button" onClick={() => index > 0 && moveWhyChooseUs(index, index - 1)} disabled={index === 0} className="text-gray-400 hover:text-gray-700 disabled:opacity-30">↑</button>
+                    <GripVertical className="w-5 h-5 text-gray-400" />
+                    <button type="button" onClick={() => index < whyChooseUsFields.length - 1 && moveWhyChooseUs(index, index + 1)} disabled={index === whyChooseUsFields.length - 1} className="text-gray-400 hover:text-gray-700 disabled:opacity-30">↓</button>
+                  </div>
+                  <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 pr-8">
+                    <Input label="Title" {...register(`whyChooseUs.cards.${index}.title` as const)} />
+                    <div className="flex items-end gap-2">
+                      <div className="flex-1">
+                        <Input label="Icon URL" {...register(`whyChooseUs.cards.${index}.icon` as const)} />
+                      </div>
+                      <button type="button" onClick={() => { setActiveMediaField(`whyChooseUs.cards.${index}.icon`); setMediaPickerOpen(true); }} className="mb-[2px] p-2 bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300">
+                        <ImageIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                      </button>
+                    </div>
+                    <div className="md:col-span-2">
+                      <Textarea label="Description" {...register(`whyChooseUs.cards.${index}.description` as const)} rows={2} />
+                    </div>
+                  </div>
+                  <button type="button" onClick={() => removeWhyChooseUs(index)} className="absolute top-4 right-4 text-gray-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                </div>
+              ))}
+              {whyChooseUsFields.length === 0 && <p className="text-sm text-gray-500 italic text-center py-4">No cards added yet.</p>}
+            </div>
+          </div>
+
+          {/* Testimonials */}
+          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
+              <h2 className="text-lg font-medium text-gray-900 dark:text-white">Testimonials</h2>
+              <button type="button" onClick={() => appendTestimonial({ customerName: '', review: '', rating: 5 })} className="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center">
+                <Plus className="w-4 h-4 mr-1" /> Add Testimonial
+              </button>
+            </div>
+            <div className="space-y-4">
+              {testimonialFields.map((item, index) => (
+                <div key={item.id} className="flex gap-4 items-start p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 relative">
+                  <div className="flex flex-col gap-2 mt-2">
+                    <button type="button" onClick={() => index > 0 && moveTestimonial(index, index - 1)} disabled={index === 0} className="text-gray-400 disabled:opacity-30">↑</button>
+                    <GripVertical className="w-5 h-5 text-gray-400" />
+                    <button type="button" onClick={() => index < testimonialFields.length - 1 && moveTestimonial(index, index + 1)} disabled={index === testimonialFields.length - 1} className="text-gray-400 disabled:opacity-30">↓</button>
+                  </div>
+                  <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 pr-8">
+                    <Input label="Customer Name" {...register(`testimonials.${index}.customerName` as const)} />
+                    <Input label="Designation" {...register(`testimonials.${index}.designation` as const)} />
+                    <Input label="Company" {...register(`testimonials.${index}.company` as const)} />
+                    
+                    <div className="flex items-end gap-2 md:col-span-2">
+                      <div className="flex-1">
+                        <Input label="Image URL" {...register(`testimonials.${index}.image` as const)} />
+                      </div>
+                      <button type="button" onClick={() => { setActiveMediaField(`testimonials.${index}.image`); setMediaPickerOpen(true); }} className="mb-[2px] p-2 bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300">
+                        <ImageIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                      </button>
+                    </div>
+                    <Input label="Rating (1-5)" type="number" {...register(`testimonials.${index}.rating` as const)} />
+                    
+                    <div className="md:col-span-3">
+                      <Textarea label="Review" {...register(`testimonials.${index}.review` as const)} rows={2} />
+                    </div>
+                  </div>
+                  <button type="button" onClick={() => removeTestimonial(index)} className="absolute top-4 right-4 text-gray-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                </div>
+              ))}
+              {testimonialFields.length === 0 && <p className="text-sm text-gray-500 italic text-center py-4">No testimonials added yet.</p>}
+            </div>
+          </div>
+
+          {/* New Contact CTA */}
+          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+            <h2 className="text-lg font-medium text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">
+              Detailed Contact CTA Section
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-2">
+                <Input label="Heading" {...register('contactCTA.heading')} placeholder="e.g. Ready to get started?" />
+              </div>
+              <div className="md:col-span-2">
+                <Textarea label="Description" {...register('contactCTA.description')} rows={2} />
+              </div>
+              <Input label="Button Text" {...register('contactCTA.buttonText')} placeholder="e.g. Contact Us Today" />
+              <Input label="Button URL" {...register('contactCTA.buttonUrl')} placeholder="e.g. /contact" />
+              <div className="md:col-span-2 flex items-end gap-2">
+                <div className="flex-1">
+                  <Input label="Background Image URL" {...register('contactCTA.backgroundImage')} />
+                </div>
+                <button type="button" onClick={() => { setActiveMediaField('contactCTA.backgroundImage'); setMediaPickerOpen(true); }} className="mb-[2px] p-2 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">
+                  <ImageIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                </button>
+              </div>
+            </div>
+          </div>
+\n          {/* SEO Integration */}
           <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700">
             <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
               SEO Settings

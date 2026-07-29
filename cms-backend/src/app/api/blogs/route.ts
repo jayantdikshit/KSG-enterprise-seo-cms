@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
           const decoded: any = verifyAccessToken(token);
           if (decoded && decoded.id) {
             await connectDB();
-            const userDoc = await User.findById(decoded.id).populate("role");
+            const userDoc: any = await User.findById(decoded.id).populate("role");
             if (userDoc && userDoc.isActive) {
               const permissions: string[] = userDoc.role?.permissions || [];
               if (permissions.includes("BLOGS_READ") || permissions.includes("ALL")) {

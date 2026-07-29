@@ -2,11 +2,12 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm, Controller } from 'react-hook-form';
-import { Save, ArrowLeft, Loader2 } from 'lucide-react';
+import { useForm, Controller, useFieldArray } from 'react-hook-form';
+import { Save, ArrowLeft, Loader2, Plus, Trash2, GripVertical, Image as ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 
 import { Input } from '@/components/admin/ui/forms/Input';
+import { Textarea } from '@/components/admin/ui/forms/Textarea';
 import { Select } from '@/components/admin/ui/forms/Select';
 import { Toggle } from '@/components/admin/ui/Toggle';
 import { SEOForm } from '@/components/admin/common/SEOForm';
@@ -15,6 +16,7 @@ import { useToast } from '@/components/admin/ui/Toast';
 import { apiCall } from '@/utils/apiUtils';
 import { PageDTO, CreatePageDTO, UpdatePageDTO } from '@/types/page.types';
 import Breadcrumb from '@/components/admin/layout/Breadcrumb';
+import { MediaPickerModal } from '@/components/admin/common/MediaPickerModal';
 
 interface PageFormProps {
   initialData?: PageDTO;
@@ -25,6 +27,8 @@ export default function PageForm({ initialData, isEdit = false }: PageFormProps)
   const router = useRouter();
   const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
+  const [activeMediaField, setActiveMediaField] = useState<any>(null);
 
   const { register, handleSubmit, control, watch, setValue, formState: { errors } } = useForm<CreatePageDTO>({
     defaultValues: {
@@ -32,6 +36,10 @@ export default function PageForm({ initialData, isEdit = false }: PageFormProps)
       slug: initialData?.slug || '',
       status: initialData?.status || 'DRAFT',
       content: initialData?.content || '',
+      whyChooseUs: initialData?.whyChooseUs || { heading: '', subheading: '', cards: [] },
+      testimonials: initialData?.testimonials || [],
+      faq: initialData?.faq || [],
+      contactCTA: initialData?.contactCTA || { heading: '', description: '', buttonText: '', buttonUrl: '', backgroundImage: '' },
       
       // SEO
       seoTitle: initialData?.seoTitle || '',
@@ -50,6 +58,21 @@ export default function PageForm({ initialData, isEdit = false }: PageFormProps)
     }
   });
 
+  const { fields: whyChooseUsFields, append: appendWhyChooseUs, remove: removeWhyChooseUs, move: moveWhyChooseUs } = useFieldArray({
+    control,
+    name: "whyChooseUs.cards"
+  });
+  
+  const { fields: testimonialFields, append: appendTestimonial, remove: removeTestimonial, move: moveTestimonial } = useFieldArray({
+    control,
+    name: "testimonials"
+  });
+
+  const { fields: faqFields, append: appendFaq, remove: removeFaq, move: moveFaq } = useFieldArray({
+    control,
+    name: "faq"
+  });
+
   const generateSlug = () => {
     const title = watch('title');
     if (title) {
@@ -64,6 +87,16 @@ export default function PageForm({ initialData, isEdit = false }: PageFormProps)
   const onSubmit = async (data: CreatePageDTO) => {
     try {
       setLoading(true);
+      if (data.whyChooseUs?.cards) {
+         data.whyChooseUs.cards = data.whyChooseUs.cards.map((c, i) => ({...c, order: i}));
+      }
+      if (data.testimonials) {
+         data.testimonials = data.testimonials.map((c, i) => ({...c, order: i}));
+      }
+      if (data.faq) {
+         data.faq = data.faq.map((c, i) => ({...c, order: i}));
+      }
+      
       const url = isEdit ? `/api/pages/${initialData?._id}` : '/api/pages';
       const method = isEdit ? 'PUT' : 'POST';
 
@@ -177,7 +210,145 @@ export default function PageForm({ initialData, isEdit = false }: PageFormProps)
             />
           </div>
 
-          {/* SEO Integration */}
+          
+          {/* Why Choose Us */}
+          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
+              <div>
+                <h2 className="text-lg font-medium text-gray-900 dark:text-white">Why Choose Us Section</h2>
+              </div>
+              <button type="button" onClick={() => appendWhyChooseUs({ title: '', description: '', icon: '' })} className="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center">
+                <Plus className="w-4 h-4 mr-1" /> Add Card
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <Input label="Heading" {...register('whyChooseUs.heading')} placeholder="e.g. Why Choose Us?" />
+              <Input label="Subheading" {...register('whyChooseUs.subheading')} placeholder="e.g. Reasons to work with us" />
+            </div>
+            
+            <div className="space-y-4">
+              {whyChooseUsFields.map((item, index) => (
+                <div key={item.id} className="flex gap-4 items-start p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 relative">
+                  <div className="flex flex-col gap-2 mt-2">
+                    <button type="button" onClick={() => index > 0 && moveWhyChooseUs(index, index - 1)} disabled={index === 0} className="text-gray-400 hover:text-gray-700 disabled:opacity-30">↑</button>
+                    <GripVertical className="w-5 h-5 text-gray-400" />
+                    <button type="button" onClick={() => index < whyChooseUsFields.length - 1 && moveWhyChooseUs(index, index + 1)} disabled={index === whyChooseUsFields.length - 1} className="text-gray-400 hover:text-gray-700 disabled:opacity-30">↓</button>
+                  </div>
+                  <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 pr-8">
+                    <Input label="Title" {...register(`whyChooseUs.cards.${index}.title` as const)} />
+                    <div className="flex items-end gap-2">
+                      <div className="flex-1">
+                        <Input label="Icon URL" {...register(`whyChooseUs.cards.${index}.icon` as const)} />
+                      </div>
+                      <button type="button" onClick={() => { setActiveMediaField(`whyChooseUs.cards.${index}.icon`); setMediaPickerOpen(true); }} className="mb-[2px] p-2 bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300">
+                        <ImageIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                      </button>
+                    </div>
+                    <div className="md:col-span-2">
+                      <Textarea label="Description" {...register(`whyChooseUs.cards.${index}.description` as const)} rows={2} />
+                    </div>
+                  </div>
+                  <button type="button" onClick={() => removeWhyChooseUs(index)} className="absolute top-4 right-4 text-gray-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                </div>
+              ))}
+              {whyChooseUsFields.length === 0 && <p className="text-sm text-gray-500 italic text-center py-4">No cards added yet.</p>}
+            </div>
+          </div>
+
+          {/* Testimonials */}
+          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
+              <h2 className="text-lg font-medium text-gray-900 dark:text-white">Testimonials</h2>
+              <button type="button" onClick={() => appendTestimonial({ customerName: '', review: '', rating: 5 })} className="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center">
+                <Plus className="w-4 h-4 mr-1" /> Add Testimonial
+              </button>
+            </div>
+            <div className="space-y-4">
+              {testimonialFields.map((item, index) => (
+                <div key={item.id} className="flex gap-4 items-start p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 relative">
+                  <div className="flex flex-col gap-2 mt-2">
+                    <button type="button" onClick={() => index > 0 && moveTestimonial(index, index - 1)} disabled={index === 0} className="text-gray-400 disabled:opacity-30">↑</button>
+                    <GripVertical className="w-5 h-5 text-gray-400" />
+                    <button type="button" onClick={() => index < testimonialFields.length - 1 && moveTestimonial(index, index + 1)} disabled={index === testimonialFields.length - 1} className="text-gray-400 disabled:opacity-30">↓</button>
+                  </div>
+                  <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 pr-8">
+                    <Input label="Customer Name" {...register(`testimonials.${index}.customerName` as const)} />
+                    <Input label="Designation" {...register(`testimonials.${index}.designation` as const)} />
+                    <Input label="Company" {...register(`testimonials.${index}.company` as const)} />
+                    
+                    <div className="flex items-end gap-2 md:col-span-2">
+                      <div className="flex-1">
+                        <Input label="Image URL" {...register(`testimonials.${index}.image` as const)} />
+                      </div>
+                      <button type="button" onClick={() => { setActiveMediaField(`testimonials.${index}.image`); setMediaPickerOpen(true); }} className="mb-[2px] p-2 bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300">
+                        <ImageIcon className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                      </button>
+                    </div>
+                    <Input label="Rating (1-5)" type="number" {...register(`testimonials.${index}.rating` as const)} />
+                    
+                    <div className="md:col-span-3">
+                      <Textarea label="Review" {...register(`testimonials.${index}.review` as const)} rows={2} />
+                    </div>
+                  </div>
+                  <button type="button" onClick={() => removeTestimonial(index)} className="absolute top-4 right-4 text-gray-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                </div>
+              ))}
+              {testimonialFields.length === 0 && <p className="text-sm text-gray-500 italic text-center py-4">No testimonials added yet.</p>}
+            </div>
+          </div>
+
+          {/* FAQs */}
+          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex justify-between items-center mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
+              <h2 className="text-lg font-medium text-gray-900 dark:text-white">Frequently Asked Questions</h2>
+              <button type="button" onClick={() => appendFaq({ question: '', answer: '' })} className="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center">
+                <Plus className="w-4 h-4 mr-1" /> Add FAQ
+              </button>
+            </div>
+            <div className="space-y-4">
+              {faqFields.map((item, index) => (
+                <div key={item.id} className="flex gap-4 items-start p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 relative">
+                  <div className="flex flex-col gap-2 mt-2">
+                    <button type="button" onClick={() => index > 0 && moveFaq(index, index - 1)} disabled={index === 0} className="text-gray-400 disabled:opacity-30">↑</button>
+                    <GripVertical className="w-5 h-5 text-gray-400" />
+                    <button type="button" onClick={() => index < faqFields.length - 1 && moveFaq(index, index + 1)} disabled={index === faqFields.length - 1} className="text-gray-400 disabled:opacity-30">↓</button>
+                  </div>
+                  <div className="flex-1 space-y-4 pr-8">
+                    <Input label="Question" {...register(`faq.${index}.question` as const, { required: 'Required' })} />
+                    <Textarea label="Answer" {...register(`faq.${index}.answer` as const)} rows={2} />
+                  </div>
+                  <button type="button" onClick={() => removeFaq(index)} className="absolute top-4 right-4 text-gray-400 hover:text-red-500"><Trash2 className="w-4 h-4" /></button>
+                </div>
+              ))}
+              {faqFields.length === 0 && <p className="text-sm text-gray-500 italic text-center py-4">No FAQs added yet.</p>}
+            </div>
+          </div>
+
+          {/* Contact CTA */}
+          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+            <h2 className="text-lg font-medium text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">
+              Contact CTA Section
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-2">
+                <Input label="Heading" {...register('contactCTA.heading')} placeholder="e.g. Ready to get started?" />
+              </div>
+              <div className="md:col-span-2">
+                <Textarea label="Description" {...register('contactCTA.description')} rows={2} />
+              </div>
+              <Input label="Button Text" {...register('contactCTA.buttonText')} placeholder="e.g. Contact Us Today" />
+              <Input label="Button URL" {...register('contactCTA.buttonUrl')} placeholder="e.g. /contact" />
+              <div className="md:col-span-2 flex items-end gap-2">
+                <div className="flex-1">
+                  <Input label="Background Image URL" {...register('contactCTA.backgroundImage')} />
+                </div>
+                <button type="button" onClick={() => { setActiveMediaField('contactCTA.backgroundImage'); setMediaPickerOpen(true); }} className="mb-[2px] p-2 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600">
+                  <ImageIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                </button>
+              </div>
+            </div>
+          </div>
+\n          {/* SEO Integration */}
           <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700">
             <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
               SEO Settings
@@ -191,6 +362,20 @@ export default function PageForm({ initialData, isEdit = false }: PageFormProps)
 
         </form>
       </div>
+
+      <MediaPickerModal
+        isOpen={mediaPickerOpen}
+        onClose={() => {
+          setMediaPickerOpen(false);
+          setActiveMediaField(null);
+        }}
+        onSelect={(url) => {
+          if (activeMediaField && typeof activeMediaField === 'string' && activeMediaField.includes('.')) {
+            setValue(activeMediaField as any, url, { shouldDirty: true, shouldValidate: true });
+          }
+        }}
+      />
     </div>
   );
 }
+

@@ -4,6 +4,7 @@ import SeoSettingModel from '@/models/SeoSetting';
 
 export const seoSettingSchema = z.object({
   siteName: z.string().min(1, 'Site name required'),
+  logoUrl: z.string().optional(),
   defaultTitle: z.string().optional(),
   defaultDescription: z.string().optional(),
   defaultKeywords: z.string().optional(),

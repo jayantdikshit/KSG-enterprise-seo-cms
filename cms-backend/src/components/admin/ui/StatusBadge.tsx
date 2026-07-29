@@ -6,9 +6,10 @@ export type StatusType = 'Published' | 'Draft' | 'Active' | 'Inactive' | 'Pendin
 interface StatusBadgeProps {
   status: StatusType | string;
   className?: string;
+  children?: React.ReactNode;
 }
 
-export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className }) => {
+export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className, children }) => {
   const getBadgeColors = (s: string) => {
     switch (s.toLowerCase()) {
       case 'published':
@@ -39,7 +40,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className }) =
         className
       )}
     >
-      {status}
+      {children || status}
     </span>
   );
 };

@@ -9,8 +9,9 @@ import { TableSkeleton } from '../ui/TableSkeleton';
 import { EmptyState } from '../ui/EmptyState';
 
 export interface Column<T> {
-  key: Extract<keyof T, string> | 'actions';
-  title: string;
+  key: string;
+  title?: string;
+  label?: string;
   render?: (item: T) => React.ReactNode;
   sortable?: boolean;
 }
@@ -30,6 +31,8 @@ interface DataTableProps<T> {
   onPageSizeChange?: (size: number) => void;
   
   // Search & Filter
+  searchable?: boolean;
+  searchKeys?: string[];
   onSearch?: (query: string) => void;
   searchPlaceholder?: string;
   filterOptions?: { label: string; value: string }[];
@@ -53,7 +56,7 @@ interface DataTableProps<T> {
   
   // Export
   exportable?: boolean;
-  exportFilename?: string;
+  exportFileName?: string;
 }
 
 export function DataTable<T>({
@@ -67,6 +70,8 @@ export function DataTable<T>({
   pageSize = 10,
   onPageChange,
   onPageSizeChange,
+  searchable = true,
+  searchKeys = [],
   onSearch,
   searchPlaceholder = 'Search...',
   filterOptions = [],
@@ -77,7 +82,7 @@ export function DataTable<T>({
   onSelectionChange,
   bulkActions = [],
   exportable = false,
-  exportFilename = 'export.csv',
+  exportFileName = 'export.csv',
 }: DataTableProps<T>) {
   
   // Internal State for Client-side operations
@@ -137,7 +142,7 @@ export function DataTable<T>({
 
   // Handle Export CSV
   const handleExportCSV = () => {
-    const headers = columns.filter(c => c.key !== 'actions').map(c => c.title).join(',');
+    const headers = columns.filter(c => c.key !== 'actions').map(c => c.title || c.label).join(',');
     const rows = data.map(item => {
       return columns
         .filter(c => c.key !== 'actions')
@@ -153,7 +158,7 @@ export function DataTable<T>({
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', exportFilename);
+    link.setAttribute('download', exportFileName);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -168,11 +173,17 @@ export function DataTable<T>({
     // Client Search
     if (internalSearch && !onSearch) {
       const lowerQuery = internalSearch.toLowerCase();
-      result = result.filter(item => 
-        Object.values(item as any).some(val => 
-          String(val).toLowerCase().includes(lowerQuery)
-        )
-      );
+      result = result.filter(item => {
+        if (searchKeys && searchKeys.length > 0) {
+          return searchKeys.some(key => {
+            const val = (item as any)[key];
+            return val != null && String(val).toLowerCase().includes(lowerQuery);
+          });
+        }
+        return Object.values(item as any).some(val => 
+          val != null && String(val).toLowerCase().includes(lowerQuery)
+        );
+      });
     }
 
     // Client Filter
@@ -289,7 +300,7 @@ export function DataTable<T>({
                   onClick={() => col.sortable && handleSort(col.key as string)}
                 >
                   <div className="flex items-center gap-1">
-                    {col.title}
+                    {col.title || col.label}
                     {col.sortable && sortConfig?.key === col.key && (
                       sortConfig.direction === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
                     )}

@@ -51,7 +51,7 @@ export function withApiAuth(
 
       // Dynamically fetch the current permissions from the database
       await connectDB();
-      const userDoc = await User.findById(decoded.id).populate("role");
+      const userDoc: any = await User.findById(decoded.id).populate("role");
       
       if (!userDoc) {
         return NextResponse.json(

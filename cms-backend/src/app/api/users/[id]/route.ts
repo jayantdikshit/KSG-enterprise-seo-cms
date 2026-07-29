@@ -8,7 +8,7 @@ import bcrypt from 'bcryptjs';
 
 export const PUT = withApiAuth(async (request: NextRequest, user, { params }) => {
   try {
-    const { id } = params as { id: string };
+    const { id } = (await params) as { id: string };
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ success: false, error: 'Invalid User ID' }, { status: 400 });
     }
@@ -50,7 +50,7 @@ export const PUT = withApiAuth(async (request: NextRequest, user, { params }) =>
 
 export const DELETE = withApiAuth(async (request: NextRequest, user, { params }) => {
   try {
-    const { id } = params as { id: string };
+    const { id } = (await params) as { id: string };
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ success: false, error: 'Invalid User ID' }, { status: 400 });
     }

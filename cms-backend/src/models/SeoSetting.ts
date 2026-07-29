@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 const SeoSettingSchema = new mongoose.Schema({
   siteName: { type: String, required: true, trim: true },
+  logoUrl: { type: String, default: '', trim: true },
   defaultTitle: { type: String, default: '', trim: true },
   defaultDescription: { type: String, default: '', trim: true },
   defaultKeywords: { type: String, default: '', trim: true },

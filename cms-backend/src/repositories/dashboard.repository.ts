@@ -28,6 +28,12 @@ export const leadsPerMonth = async () =>
     { $sort: { _id: 1 } }
   ]);
 
+export const leadsPerDay = async () =>
+  Lead.aggregate([
+    { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, count: { $sum: 1 } } },
+    { $sort: { _id: 1 } }
+  ]);
+
 export const blogsPerMonth = async () =>
   Blog.aggregate([
     { $match: { status: 'published' } },

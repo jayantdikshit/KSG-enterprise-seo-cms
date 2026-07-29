@@ -37,7 +37,7 @@ export const PUT = withApiAuth(async (req, user, context) => {
     const ipAddress = req.headers.get("x-forwarded-for") || "unknown";
     const userAgent = req.headers.get("user-agent") || "unknown";
 
-    const updated = await LeadService.updateLead(id, validatedData, user.id, ipAddress, userAgent);
+    const updated = await LeadService.updateLead(id, validatedData as any, user.id, ipAddress, userAgent);
 
     return NextResponse.json(
       {

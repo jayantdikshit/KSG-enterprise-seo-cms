@@ -16,7 +16,7 @@ export async function GET() {
     await seedRoles();
 
     // Check if admin user already exists
-    const existing = await User.findOne({ email: 'admin@test.com' });
+    const existing: any = await User.findOne({ email: 'admin@test.com' });
     if (existing) {
       // Re-link to the freshly-seeded SUPER_ADMIN role
       const adminRole = await Role.findOne({ name: 'SUPER_ADMIN' });
@@ -39,12 +39,12 @@ export async function GET() {
 
     // Create admin user
     const hashedPw = await hashPassword('123456');
-    const adminUser = await User.create({
+    const adminUser: any = await User.create({
       name: 'Admin',
       email: 'admin@test.com',
       password: hashedPw,
       role: adminRole._id,
-    });
+    } as any);
 
     return NextResponse.json({
       success: true,

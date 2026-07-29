@@ -41,6 +41,7 @@ export interface DashboardChartData {
 
 export interface DashboardCharts {
   monthlyLeads?: DashboardChartData[];
+  dailyLeads?: DashboardChartData[];
   monthlyBlogs?: DashboardChartData[];
   servicesCreated?: DashboardChartData[];
   leadChart?: DashboardChartData[];

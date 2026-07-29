@@ -173,7 +173,7 @@ export const ApiUtils = {
 /**
  * Utility matching the legacy apiCall signature
  */
-export async function apiCall<T = any>(endpoint: string, options: RequestInit = {}): Promise<T> {
+export async function apiCall<T = any>(endpoint: string, options: Omit<RequestInit, 'body'> & { body?: any } = {}): Promise<T> {
   const method = options.method || 'GET';
 
   if (method === 'GET') {
@@ -191,10 +191,12 @@ export async function apiCall<T = any>(endpoint: string, options: RequestInit = 
   // fallback for any other method
   const url = buildUrl(endpoint);
   const isFormData = options.body instanceof FormData;
+  const isString = typeof options.body === 'string';
   const fetchOptions = {
     ...options,
     headers: getHeaders(options.headers, isFormData),
+    body: (isFormData || isString || !options.body) ? options.body : JSON.stringify(options.body),
   };
-  const response = await fetch(url, fetchOptions);
+  const response = await fetch(url, fetchOptions as RequestInit);
   return handleResponse<T>(response, url, fetchOptions);
 }

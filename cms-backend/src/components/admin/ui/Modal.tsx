@@ -8,9 +8,20 @@ interface ModalProps {
   title?: string;
   children: React.ReactNode;
   className?: string;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | 'full' | string;
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, className }) => {
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, className, size = 'lg' }) => {
+  const sizeClass = size === 'sm' ? 'max-w-sm' : 
+                    size === 'md' ? 'max-w-md' :
+                    size === 'lg' ? 'max-w-lg' :
+                    size === 'xl' ? 'max-w-xl' :
+                    size === '2xl' ? 'max-w-2xl' :
+                    size === '3xl' ? 'max-w-3xl' :
+                    size === '4xl' ? 'max-w-4xl' :
+                    size === '5xl' ? 'max-w-5xl' :
+                    size === 'full' ? 'max-w-[90vw]' : 'max-w-lg';
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -42,7 +53,8 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
       {/* Modal content */}
       <div 
         className={cn(
-          "relative z-50 w-full max-w-lg rounded-xl bg-background p-6 shadow-xl ring-1 ring-black/5 dark:ring-white/10",
+          "relative z-50 w-full rounded-xl bg-background p-6 shadow-xl ring-1 ring-black/5 dark:ring-white/10",
+          sizeClass,
           className
         )}
       >

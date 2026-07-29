@@ -8,6 +8,7 @@ interface ConfirmDeleteModalProps {
   onConfirm: () => void;
   title?: string;
   message?: string;
+  description?: string;
   isLoading?: boolean;
 }
 
@@ -16,16 +17,19 @@ export const ConfirmDeleteModal: React.FC<ConfirmDeleteModalProps> = ({
   onClose,
   onConfirm,
   title = 'Confirm Deletion',
-  message = 'Are you sure you want to delete this item? This action cannot be undone.',
+  message,
+  description,
   isLoading = false,
 }) => {
+  const displayMessage = message || description || 'Are you sure you want to delete this item? This action cannot be undone.';
+  
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title}>
       <div className="flex flex-col items-center text-center">
         <div className="mb-4 rounded-full bg-red-100 p-3 dark:bg-red-900/30">
           <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />
         </div>
-        <p className="mb-6 text-sm text-muted-foreground">{message}</p>
+        <p className="mb-6 text-sm text-muted-foreground">{displayMessage}</p>
         
         <div className="flex w-full justify-end space-x-3">
           <button

@@ -1,3 +1,5 @@
+import { IWhyChooseUs, ITestimonial, IFAQ, IContactCTA } from './homepage.types';
+
 export interface PageSection {
   id: string;
   type: string;
@@ -9,6 +11,10 @@ export interface CreatePageDTO {
   title: string;
   slug: string;
   content?: string;
+  whyChooseUs?: IWhyChooseUs;
+  testimonials?: ITestimonial[];
+  faq?: IFAQ[];
+  contactCTA?: IContactCTA;
   status?: "DRAFT" | "PUBLISHED";
   seoTitle?: string;
   metaDescription?: string;
@@ -31,6 +37,10 @@ export interface UpdatePageDTO {
   title?: string;
   slug?: string;
   content?: string;
+  whyChooseUs?: IWhyChooseUs;
+  testimonials?: ITestimonial[];
+  faq?: IFAQ[];
+  contactCTA?: IContactCTA;
   status?: "DRAFT" | "PUBLISHED";
   seoTitle?: string;
   metaDescription?: string;
@@ -54,6 +64,10 @@ export interface PageDTO {
   title: string;
   slug: string;
   content: string;
+  whyChooseUs?: IWhyChooseUs;
+  testimonials?: ITestimonial[];
+  faq?: IFAQ[];
+  contactCTA?: IContactCTA;
   status: "DRAFT" | "PUBLISHED";
   seoTitle?: string;
   metaDescription?: string;

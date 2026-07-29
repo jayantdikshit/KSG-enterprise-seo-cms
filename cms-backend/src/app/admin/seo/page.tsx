@@ -1,24 +1,27 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Save, Loader2, Globe, Search, BarChart, Share2 } from 'lucide-react';
+import { Save, Loader2, Globe, Search, BarChart, Share2, Image as ImageIcon } from 'lucide-react';
 import { apiCall } from '@/utils/apiUtils';
 import { SeoSettingDTO } from '@/types/seo.types';
 import { useToast } from '@/components/admin/ui/Toast';
 import Breadcrumb from '@/components/admin/layout/Breadcrumb';
 import { Input } from '@/components/admin/ui/forms/Input';
 import { Textarea } from '@/components/admin/ui/forms/Textarea';
-
 import { PermissionWrapper } from '@/components/admin/common/PermissionWrapper';
+import { MediaPickerModal } from '@/components/admin/common/MediaPickerModal';
 
 export default function SeoManagerPage() {
   const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<'general' | 'analytics' | 'webmaster' | 'social'>('general');
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
+  const [activeMediaField, setActiveMediaField] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<SeoSettingDTO>({
     siteName: '',
+    logoUrl: '',
     defaultTitle: '',
     defaultDescription: '',
     defaultKeywords: '',
@@ -66,6 +69,11 @@ export default function SeoManagerPage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const openMediaPicker = (fieldName: string) => {
+    setActiveMediaField(fieldName);
+    setMediaPickerOpen(true);
   };
 
   if (loading) {
@@ -136,10 +144,27 @@ export default function SeoManagerPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Input 
                     label="Site Name" 
-                    value={formData.siteName}
+                    value={formData.siteName || ''}
                     onChange={(e) => setFormData({...formData, siteName: e.target.value})}
                     placeholder="e.g. My Awesome CMS"
                   />
+                  <div className="flex items-end gap-2">
+                    <div className="flex-1">
+                      <Input 
+                        label="Site Logo URL" 
+                        value={formData.logoUrl || ''}
+                        onChange={(e) => setFormData({...formData, logoUrl: e.target.value})}
+                        placeholder="e.g. /logo.png or https://example.com/logo.png"
+                      />
+                    </div>
+                    <button 
+                      type="button" 
+                      onClick={() => openMediaPicker('logoUrl')} 
+                      className="mb-[2px] p-2 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600"
+                    >
+                      <ImageIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                    </button>
+                  </div>
                   <Input 
                     label="Default Canonical URL (Base URL)" 
                     value={formData.defaultCanonicalUrl}
@@ -174,12 +199,23 @@ export default function SeoManagerPage() {
 
                 <div className="pt-4">
                   <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Default OpenGraph Image</h3>
-                  <Input 
-                    label="Image URL"
-                    value={formData.defaultOgImage}
-                    onChange={(e) => setFormData({...formData, defaultOgImage: e.target.value})}
-                    placeholder="https://example.com/image.jpg"
-                  />
+                  <div className="flex items-end gap-2">
+                    <div className="flex-1">
+                      <Input 
+                        label="Image URL"
+                        value={formData.defaultOgImage}
+                        onChange={(e) => setFormData({...formData, defaultOgImage: e.target.value})}
+                        placeholder="https://example.com/image.jpg"
+                      />
+                    </div>
+                    <button 
+                      type="button" 
+                      onClick={() => openMediaPicker('defaultOgImage')} 
+                      className="mb-[2px] p-2 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-600"
+                    >
+                      <ImageIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                    </button>
+                  </div>
                   <p className="mt-1 text-xs text-gray-500">Recommended size: 1200x630px. Used when pages are shared on social media.</p>
                 </div>
               </div>
@@ -250,6 +286,20 @@ export default function SeoManagerPage() {
           </div>
         </div>
       </div>
+      
+      <MediaPickerModal
+        isOpen={mediaPickerOpen}
+        onClose={() => {
+          setMediaPickerOpen(false);
+          setActiveMediaField(null);
+        }}
+        onSelect={(url) => {
+          if (activeMediaField) {
+            setFormData({...formData, [activeMediaField]: url});
+          }
+        }}
+        title="Select Media"
+      />
     </div>
   );
 }

@@ -1,3 +1,5 @@
+import { IWhyChooseUs, ITestimonial, IFAQ, IContactCTA } from './homepage.types';
+
 export interface ITeamMember {
   _id?: string;
   name: string;
@@ -21,12 +23,21 @@ export interface IStatistic {
 
 export interface IAbout {
   _id?: string;
+  pageTitle?: string;
+  pageTitleHighlight?: string;
+  pageSubtitle?: string;
   companyOverview: string;
   mission: string;
   vision: string;
   teamMembers?: ITeamMember[];
   statistics?: IStatistic[];
   images?: string[];
+  
+  whyChooseUs?: IWhyChooseUs;
+  testimonials?: ITestimonial[];
+  faq?: IFAQ[];
+  contactCTA?: IContactCTA;
+
   seoTitle?: string;
   metaDescription?: string;
   metaKeywords?: string;

@@ -26,7 +26,7 @@ export async function GET(
           const decoded: any = verifyAccessToken(token);
           if (decoded && decoded.id) {
             await connectDB();
-            const userDoc = await User.findById(decoded.id).populate("role");
+            const userDoc: any = await User.findById(decoded.id).populate("role");
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 if (userDoc && (userDoc as any).isActive) {
               // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { whyChooseUsBaseSchema, testimonialBaseSchema, faqBaseSchema, contactCTABaseSchema } from "./homepage.validator";
 
 const objectIdRegex = /^[0-9a-fA-F]{24}$/;
 
@@ -33,12 +34,20 @@ export const statisticSchema = z.object({
 });
 
 const aboutBaseSchema = z.object({
+  pageTitle: z.string().optional(),
+  pageTitleHighlight: z.string().optional(),
+  pageSubtitle: z.string().optional(),
   companyOverview: z.string().min(3, "Company overview must be at least 3 characters"),
   mission: z.string().min(3, "Mission statement must be at least 3 characters"),
   vision: z.string().min(3, "Vision statement must be at least 3 characters"),
   teamMembers: z.array(teamMemberSchema).optional(),
   statistics: z.array(statisticSchema).optional(),
   images: z.array(z.string()).optional(),
+  
+  whyChooseUs: whyChooseUsBaseSchema.optional(),
+  testimonials: z.array(testimonialBaseSchema).optional(),
+  faq: z.array(faqBaseSchema).optional(),
+  contactCTA: contactCTABaseSchema.optional(),
   
   // SEO fields
   seoTitle: z.string().optional(),
@@ -53,6 +62,9 @@ const aboutBaseSchema = z.object({
 });
 
 const aboutCreateSchema = aboutBaseSchema.extend({
+  pageTitle: z.string().optional().default("About"),
+  pageTitleHighlight: z.string().optional().default("Our Company"),
+  pageSubtitle: z.string().optional().default("Discover our mission, vision, and the core values that drive us to build a better future."),
   teamMembers: z.array(teamMemberSchema).optional().default([]),
   statistics: z.array(statisticSchema).optional().default([]),
   images: z.array(z.string()).optional().default([]),
@@ -71,7 +83,7 @@ const aboutCreateSchema = aboutBaseSchema.extend({
 
 const normalizeAboutKeys = (val: unknown) => {
   if (val && typeof val === "object") {
-    const copy = { ...val };
+    const copy: any = { ...val };
     if (copy.canonicalURL !== undefined && copy.canonicalUrl === undefined) {
       copy.canonicalUrl = copy.canonicalURL;
     }

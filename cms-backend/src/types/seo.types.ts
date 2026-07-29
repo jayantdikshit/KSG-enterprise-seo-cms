@@ -1,6 +1,7 @@
 export interface SeoSettingDTO {
   _id?: string;
   siteName: string;
+  logoUrl?: string;
   defaultTitle: string;
   defaultDescription: string;
   defaultKeywords: string;

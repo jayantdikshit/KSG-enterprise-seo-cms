@@ -17,13 +17,10 @@ export class MenuService {
   ) {
     await connectDB();
 
-    // Check location uniqueness
+    // Auto-unassign location from any existing menu to prevent 409 Conflict
     if (data.location) {
       const locLower = data.location.toLowerCase().trim();
-      const existingByLoc = await Menu.findOne({ location: locLower });
-      if (existingByLoc) {
-        throw new Error(`A menu is already assigned to location '${data.location}'`);
-      }
+      await Menu.updateMany({ location: locLower }, { $set: { location: null } });
     }
 
     const menu = await Menu.create({
@@ -60,16 +57,13 @@ export class MenuService {
       throw new Error("Menu not found");
     }
 
-    // Check location uniqueness if modified
+    // Auto-unassign location from any existing menu to prevent 409 Conflict
     if (data.location) {
       const locLower = data.location.toLowerCase().trim();
-      const existingByLoc = await Menu.findOne({
-        location: locLower,
-        _id: { $ne: menuId },
-      });
-      if (existingByLoc) {
-        throw new Error(`A menu is already assigned to location '${data.location}'`);
-      }
+      await Menu.updateMany(
+        { location: locLower, _id: { $ne: menuId } },
+        { $set: { location: null } }
+      );
     }
 
     const oldData = menu.toObject();

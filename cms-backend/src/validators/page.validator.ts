@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { whyChooseUsBaseSchema, testimonialBaseSchema, faqBaseSchema, contactCTABaseSchema } from "./homepage.validator";
 
 const sectionSchema = z.object({
   id: z.string().min(1, "Section ID is required"),
@@ -35,6 +36,10 @@ const pageBaseSchema = z.object({
   twitterDescription: z.string().optional(),
   twitterImage: z.string().optional(),
   sections: z.array(sectionSchema).optional(),
+  whyChooseUs: whyChooseUsBaseSchema.optional(),
+  testimonials: z.array(testimonialBaseSchema).optional(),
+  faq: z.array(faqBaseSchema).optional(),
+  contactCTA: contactCTABaseSchema.optional(),
 });
 
 export const createPageSchema = pageBaseSchema.extend({

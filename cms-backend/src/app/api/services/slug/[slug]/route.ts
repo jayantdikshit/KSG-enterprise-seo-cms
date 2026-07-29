@@ -7,7 +7,8 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
-    const service = await ServiceService.getServiceBySlug(slug);
+    const rawService = await ServiceService.getServiceBySlug(slug);
+    const service: any = rawService;
 
     // Dynamic Google Rich Schemas
     const serviceSchema = {

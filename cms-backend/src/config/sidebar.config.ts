@@ -1,4 +1,4 @@
-import { HiOutlineHome, HiOutlineCollection, HiOutlineUserGroup, HiOutlineChartBar, HiOutlineDocumentText, HiOutlineChatAlt2, HiOutlineCog } from 'react-icons/hi';
+import { HiOutlineHome, HiOutlineCollection, HiOutlineUserGroup, HiOutlineChartBar, HiOutlineDocumentText, HiOutlineChatAlt2, HiOutlineCog, HiOutlineBriefcase } from 'react-icons/hi';
 
 export const sidebarMenu = [
   {
@@ -17,6 +17,12 @@ export const sidebarMenu = [
     title: 'Pages',
     icon: HiOutlineDocumentText,
     path: '/admin/pages',
+    roles: ['SUPER_ADMIN', 'EDITOR'],
+  },
+  {
+    title: 'Services',
+    icon: HiOutlineBriefcase,
+    path: '/admin/services',
     roles: ['SUPER_ADMIN', 'EDITOR'],
   },
   {

@@ -5,9 +5,13 @@ import { usePermission } from '@/providers/PermissionProvider';
 
 const navItems = [
   { name: 'Dashboard', href: '/admin/dashboard', permission: 'VIEW_DASHBOARD' },
+  { name: 'Homepage Settings', href: '/admin/homepage', permission: 'MANAGE_PAGES' },
+  { name: 'About Us Settings', href: '/admin/about', permission: 'MANAGE_PAGES' },
   { name: 'Pages', href: '/admin/pages', permission: 'MANAGE_PAGES' },
+  { name: 'Menus', href: '/admin/menus', permission: 'MANAGE_PAGES' },
   { name: 'Blogs', href: '/admin/blogs', permission: 'MANAGE_BLOGS' },
   { name: 'Services', href: '/admin/services', permission: 'MANAGE_SERVICES' },
+  { name: 'Products', href: '/admin/products', permission: 'MANAGE_SERVICES' }, // Temporarily using MANAGE_SERVICES
   { name: 'Leads', href: '/admin/leads', permission: 'MANAGE_LEADS' },
   { name: 'Media Library', href: '/admin/media', permission: 'MANAGE_MEDIA' },
   { name: 'SEO Settings', href: '/admin/seo', permission: 'MANAGE_SEO' },
@@ -22,7 +26,7 @@ export default function Sidebar() {
   const { hasPermission } = usePermission();
 
   return (
-    <aside className="w-64 bg-white dark:bg-gray-800 shadow-lg flex flex-col p-4">
+    <aside className="w-64 h-full bg-white dark:bg-gray-800 shadow-lg flex flex-col p-4 overflow-y-auto">
       <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-6">Admin Panel</h2>
       <nav className="flex-1 space-y-2">
         {navItems

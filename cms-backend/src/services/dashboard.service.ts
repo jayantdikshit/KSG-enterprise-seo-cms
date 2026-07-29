@@ -13,6 +13,7 @@ import {
   countQualifiedLeads,
   countClosedLeads,
   leadsPerMonth,
+  leadsPerDay,
   blogsPerMonth,
   servicesCreatedPerMonth,
   recentLeads,
@@ -93,8 +94,9 @@ const buildSuperAdmin = async () => {
     countMenus()
   ]);
 
-  const [monthlyLeads, monthlyBlogs, servicesCreated] = await Promise.all([
+  const [monthlyLeads, dailyLeads, monthlyBlogs, servicesCreated] = await Promise.all([
     leadsPerMonth(),
+    leadsPerDay(),
     blogsPerMonth(),
     servicesCreatedPerMonth()
   ]);
@@ -115,7 +117,7 @@ const buildSuperAdmin = async () => {
 
   return {
     cards: { pages, blogs, services, leads, newLeads, qualifiedLeads, closedLeads, users, media, activeRedirects, menus },
-    charts: { monthlyLeads, monthlyBlogs, servicesCreated },
+    charts: { monthlyLeads, dailyLeads, monthlyBlogs, servicesCreated },
     recentActivities,
     quickActions: quickActions.SUPER_ADMIN,
     systemInfo
@@ -154,10 +156,11 @@ const buildMarketingManager = async () => {
   ]);
 
   const leadChart = await leadsPerMonth(); // could be extended to status/source charts
+  const dailyLeads = await leadsPerDay();
 
   return {
     cards: { totalLeads, newLeads, qualifiedLeads, closedLeads, totalBlogs },
-    charts: { leadChart },
+    charts: { leadChart, dailyLeads },
     quickActions: quickActions.MARKETING_MANAGER
   };
 };

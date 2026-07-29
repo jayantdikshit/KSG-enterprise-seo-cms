@@ -209,6 +209,7 @@ export default function DashboardPage() {
       {data?.charts && (
         <DashboardCharts 
           monthlyLeads={data.charts.monthlyLeads} 
+          dailyLeads={data.charts.dailyLeads} 
           monthlyBlogs={data.charts.monthlyBlogs} 
         />
       )}
@@ -237,7 +238,7 @@ export default function DashboardPage() {
           <EmptyState 
             title="No Recent Activity" 
             description="Your dashboard is quiet. Check back later when users interact with the CMS." 
-            icon={<Activity className="w-8 h-8 text-indigo-500" />} 
+            icon={Activity}
           />
         </div>
       )}
