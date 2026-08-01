@@ -63,11 +63,11 @@ export default function HomepageForm() {
       try {
         const [homepageRes, servicesRes] = await Promise.all([
           apiCall<{ success: boolean; data: IHomePage }>('/api/homepage').catch(() => null),
-          apiCall<{ success: boolean; data: { services: ServiceDTO[] } }>('/api/services').catch(() => null)
+          apiCall<{ success: boolean; data: ServiceDTO[] }>('/api/services').catch(() => null)
         ]);
         
-        if (servicesRes && servicesRes.success && servicesRes.data?.services) {
-           setServicesList(servicesRes.data.services);
+        if (servicesRes && servicesRes.success && Array.isArray(servicesRes.data)) {
+           setServicesList(servicesRes.data);
         }
 
         if (homepageRes && homepageRes.success && homepageRes.data) {

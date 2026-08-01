@@ -10,6 +10,7 @@ const navItems = [
   { name: 'Pages', href: '/admin/pages', permission: 'MANAGE_PAGES' },
   { name: 'Menus', href: '/admin/menus', permission: 'MANAGE_PAGES' },
   { name: 'Blogs', href: '/admin/blogs', permission: 'MANAGE_BLOGS' },
+  { name: 'Blog Categories', href: '/admin/categories', permission: 'MANAGE_BLOGS' },
   { name: 'Services', href: '/admin/services', permission: 'MANAGE_SERVICES' },
   { name: 'Products', href: '/admin/products', permission: 'MANAGE_SERVICES' }, // Temporarily using MANAGE_SERVICES
   { name: 'Leads', href: '/admin/leads', permission: 'MANAGE_LEADS' },

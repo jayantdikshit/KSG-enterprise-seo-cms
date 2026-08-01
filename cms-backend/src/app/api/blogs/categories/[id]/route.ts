@@ -94,3 +94,29 @@ export const DELETE = withApiAuth(async (req, user, context) => {
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }
 }, "BLOGS_DELETE");
+
+export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> | { id: string } }) {
+  try {
+    const params = await context.params;
+    const { id } = params;
+
+    const category = await CategoryService.getCategoryById(id);
+
+    return NextResponse.json(
+      {
+        success: true,
+        data: category,
+      },
+      { status: 200 }
+    );
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to fetch category";
+
+    if (message.includes("not found")) {
+      return NextResponse.json({ success: false, error: "Category not found" }, { status: 404 });
+    }
+
+    console.error("[GET /api/blog/categories/[id]]", message);
+    return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
+  }
+}

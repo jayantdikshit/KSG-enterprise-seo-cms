@@ -40,6 +40,9 @@ const MediaSchema = new mongoose.Schema(
     webpUrl: {
       type: String,
     },
+    cloudinaryPublicId: {
+      type: String,
+    },
     alt: {
       type: String,
       default: "",

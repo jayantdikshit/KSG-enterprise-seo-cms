@@ -206,6 +206,15 @@ export default function BlogForm({ initialData, isEdit = false }: BlogFormProps)
                       Select from Media Library
                     </button>
                   </div>
+                  {/* URL Input for Featured Image */}
+                  <div className="flex gap-2 mb-3">
+                    <input
+                      type="text"
+                      placeholder="Or paste image URL here..."
+                      {...register('featuredImage')}
+                      className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                  </div>
                   {watch('featuredImage') && (
                     <div className="mb-4 relative w-full max-w-md h-48 rounded-lg overflow-hidden border border-gray-200">
                       {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -39,7 +39,14 @@ const blogBaseSchema = z.object({
 
   seoTitle: z.string().max(60, "SEO Title cannot exceed 60 characters").optional(),
   metaDescription: z.string().max(160, "Meta Description cannot exceed 160 characters").optional(),
-  metaKeywords: z.array(z.string()).optional(),
+  metaKeywords: z.preprocess(
+    (val) => {
+      if (Array.isArray(val)) return val;
+      if (typeof val === "string" && val.trim()) return val.split(",").map((s: string) => s.trim()).filter(Boolean);
+      return [];
+    },
+    z.array(z.string()).optional()
+  ),
   canonicalUrl: z.string().optional(),
 
   ogTitle: z.string().max(100, "OG Title cannot exceed 100 characters").optional(),
@@ -50,10 +57,10 @@ const blogBaseSchema = z.object({
   twitterDescription: z.string().max(160, "Twitter Description cannot exceed 160 characters").optional(),
   twitterImage: z.string().optional(),
   schemaMarkup: z.string().optional(),
-  robotsIndex: z.boolean().optional(),
-  robotsFollow: z.boolean().optional(),
-  generateFaqSchema: z.boolean().optional(),
-  generateBreadcrumbSchema: z.boolean().optional(),
+  robotsIndex: z.preprocess((val) => val === "true" || val === true, z.boolean().optional()),
+  robotsFollow: z.preprocess((val) => val === "true" || val === true, z.boolean().optional()),
+  generateFaqSchema: z.preprocess((val) => val === "true" || val === true, z.boolean().optional()),
+  generateBreadcrumbSchema: z.preprocess((val) => val === "true" || val === true, z.boolean().optional()),
 });
 
 export const createBlogSchema = blogBaseSchema.extend({
@@ -69,7 +76,14 @@ export const createBlogSchema = blogBaseSchema.extend({
     .default("DRAFT"),
   seoTitle: z.string().max(60, "SEO Title cannot exceed 60 characters").optional().default(""),
   metaDescription: z.string().max(160, "Meta Description cannot exceed 160 characters").optional().default(""),
-  metaKeywords: z.array(z.string()).optional().default([]),
+  metaKeywords: z.preprocess(
+    (val) => {
+      if (Array.isArray(val)) return val;
+      if (typeof val === "string" && val.trim()) return val.split(",").map((s: string) => s.trim()).filter(Boolean);
+      return [];
+    },
+    z.array(z.string()).optional().default([])
+  ),
   canonicalUrl: z.string().optional().default(""),
   ogTitle: z.string().max(100, "OG Title cannot exceed 100 characters").optional().default(""),
   ogDescription: z.string().max(160, "OG Description cannot exceed 160 characters").optional().default(""),

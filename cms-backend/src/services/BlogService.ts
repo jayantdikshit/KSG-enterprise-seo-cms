@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Blog from "../models/Blog";
 import BlogCategory from "../models/BlogCategory";
 import AuditLog from "../models/AuditLog";
+import "../models/User"; // Register User schema for populate calls
 import { connectDB } from "../lib/mongodb";
 import { CreateBlogDTO, UpdateBlogDTO } from "../types/blog.types";
 

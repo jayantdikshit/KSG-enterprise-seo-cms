@@ -10,8 +10,8 @@ import {
   deleteMediaFiles,
   getFileType,
   getImageDimensions,
-  saveBufferToUpload,
 } from "../utils/storage";
+import { uploadToCloudinary, deleteFromCloudinary } from "../utils/cloudinary";
 
 import path from "path";
 
@@ -39,14 +39,18 @@ export class MediaService {
     }
 
     // Get dimensions (safely handles missing/broken sharp)
-    const { width, height } = await getImageDimensions(buffer);
+    let { width, height } = await getImageDimensions(buffer);
 
-    // Compress & Save original image
-    const url = await saveBufferToUpload(buffer, normalizedFileName, "IMAGE");
-
-    // Convert & Save to webp
-    const webpFileName = `${normalizedFileName.replace(/\.[^.]+$/, "")}.webp`;
-    const webpUrl = await convertImageBufferToWebp(buffer, webpFileName);
+    // Upload to Cloudinary
+    const result = await uploadToCloudinary(buffer, "cms_images", "image");
+    
+    // Cloudinary returns width/height directly, so we can prioritize it
+    width = result.width || width;
+    height = result.height || height;
+    
+    const url = result.secure_url;
+    // Generate WebP URL dynamically via Cloudinary transformations
+    const webpUrl = url.replace('/upload/', '/upload/f_webp,q_auto/');
 
     const ext = path.extname(normalizedFileName).replace(".", "").toLowerCase();
 
@@ -67,6 +71,7 @@ export class MediaService {
       height,
       url,
       webpUrl,
+      cloudinaryPublicId: result.public_id,
       uploadedBy: new mongoose.Types.ObjectId(userId),
       createdBy: new mongoose.Types.ObjectId(userId),
     });
@@ -108,8 +113,9 @@ export class MediaService {
       throw new Error("Media file already exists");
     }
 
-    // Save PDF
-    const url = await saveBufferToUpload(buffer, normalizedFileName, "PDF");
+    // Upload PDF to Cloudinary
+    const result = await uploadToCloudinary(buffer, "cms_pdfs", "raw");
+    const url = result.secure_url;
 
     const ext = "pdf";
 
@@ -127,6 +133,7 @@ export class MediaService {
       caption: data.caption || "",
       description: data.description || "",
       url,
+      cloudinaryPublicId: result.public_id,
       uploadedBy: new mongoose.Types.ObjectId(userId),
       createdBy: new mongoose.Types.ObjectId(userId),
     });
@@ -256,7 +263,15 @@ export class MediaService {
 
     const deleted = await Media.findByIdAndDelete(mediaId);
     
-    // Delete files from disk
+    // Delete from Cloudinary if public ID exists
+    if (media.cloudinaryPublicId) {
+      await deleteFromCloudinary(
+        media.cloudinaryPublicId, 
+        media.fileType === "PDF" ? "raw" : "image"
+      );
+    }
+
+    // Delete files from local disk (for backward compatibility with old uploads)
     await deleteMediaFiles(media.fileName, media.fileType, media.webpUrl);
 
     await AuditLog.create({

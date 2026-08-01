@@ -21,7 +21,7 @@ async function getHomePageData() {
       path: 'services.selectedServices',
       model: Service,
       match: { status: 'PUBLISHED' },
-      select: 'name slug shortDescription description featuredImage bannerImage order',
+      select: 'name slug shortDescription description featuredImage bannerImage order keyFeatures',
     })
     .lean();
 

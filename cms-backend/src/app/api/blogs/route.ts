@@ -34,6 +34,7 @@ export const POST = withApiAuth(async (req, user) => {
     );
   } catch (error: unknown) {
     if (error instanceof ZodError) {
+      console.error("[POST /api/blogs] Validation Error Details:", JSON.stringify(error.issues, null, 2));
       return NextResponse.json(
         {
           success: false,

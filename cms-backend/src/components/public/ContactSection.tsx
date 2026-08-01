@@ -46,18 +46,6 @@ export default function ContactSection({ settings }: { settings?: any }) {
 
       setSuccess(true);
 
-      // WhatsApp redirect logic
-      const whatsappNumber = settings?.whatsappNumber || settings?.phone || "919876543210";
-      const cleanNumber = whatsappNumber.replace(/[^0-9]/g, '');
-      const whatsappMessage = 
-        `Hi KSG Energy,%0A%0A` +
-        `Name: ${formData.name}%0A` +
-        `Email: ${formData.email}%0A` +
-        `Company: ${formData.company}%0A` +
-        `Message: ${formData.message}`;
-
-      window.open(`https://wa.me/${cleanNumber}?text=${whatsappMessage}`, "_blank");
-
       setFormData({ name: "", email: "", phone: "", company: "", message: "" });
     } catch (err: any) {
       setError("Failed to send message. Please try again.");
