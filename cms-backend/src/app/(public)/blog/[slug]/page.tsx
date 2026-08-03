@@ -73,10 +73,10 @@ export default async function SingleBlogPage({ params }: { params: Promise<{ slu
         </div>
       </div>
 
-      <div className="container" style={{ display: 'flex', gap: '50px', flexWrap: 'wrap' }}>
+      <div style={{ width: '100%', padding: '0 3%' }}>
         
         {/* ARTICLE CONTENT */}
-        <article style={{ flex: '1 1 700px', backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.05)', padding: '40px', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+        <article style={{ width: '100%', backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.05)', padding: '40px 5%', borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
           {blog.featuredImage && (
             <div style={{ marginBottom: '40px', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.3)' }}>
               <img 
@@ -104,33 +104,44 @@ export default async function SingleBlogPage({ params }: { params: Promise<{ slu
             </div>
           )}
         </article>
-
-        {/* SIDEBAR WIDGETS */}
-        <aside style={{ flex: '1 1 300px', maxWidth: '350px' }}>
-          
-          {/* Recent Blogs */}
-          {recentBlogs.length > 0 && (
-            <div style={{ backgroundColor: '#0f172a', padding: '30px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', marginBottom: '40px' }}>
-              <h3 style={{ fontSize: '1.3rem', color: '#f8fafc', marginBottom: '25px', fontWeight: 700, borderBottom: '2px solid #22c55e', paddingBottom: '10px', display: 'inline-block' }}>Recent Articles</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-                {recentBlogs.map((rb: any) => (
-                  <Link href={`/blog/${rb.slug}`} key={rb._id} style={{ display: 'flex', gap: '15px', textDecoration: 'none', group: 'true' }}>
-                    <div style={{ width: '80px', height: '80px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0 }}>
-                      <img src={rb.featuredImage || "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=200"} alt={rb.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    </div>
-                    <div>
-                      <h4 style={{ fontSize: '1rem', color: '#f8fafc', margin: '0 0 5px 0', lineHeight: 1.3, fontWeight: 600 }}>{rb.title}</h4>
-                      <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{new Date(rb.publishDate).toLocaleDateString()}</span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-          
-        </aside>
-
       </div>
+
+      {/* RECENT BLOGS SECTION */}
+      {recentBlogs.length > 0 && (
+        <div className="container" style={{ marginTop: '80px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px' }}>
+            <div>
+              <h2 style={{ fontSize: '2.5rem', color: '#f8fafc', fontWeight: 800, margin: 0 }}>Recent Articles</h2>
+              <p style={{ color: '#94a3b8', marginTop: '10px', fontSize: '1.1rem' }}>Latest updates from KSG Energy</p>
+            </div>
+            <Link href={`/blog`} style={{ color: '#4ADE80', fontWeight: 600, textDecoration: 'none' }}>
+              View all articles &rarr;
+            </Link>
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '30px' }}>
+            {recentBlogs.map((rb: any) => (
+              <div key={rb._id} style={{ backgroundColor: '#0f172a', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)', transition: 'transform 0.3s ease' }} className="blog-card">
+                <img 
+                  src={rb.featuredImage || "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=600"} 
+                  alt={rb.title} 
+                  style={{ width: '100%', height: '220px', objectFit: 'cover' }}
+                />
+                <div style={{ padding: '25px' }}>
+                  <h3 style={{ fontSize: '1.3rem', color: '#f8fafc', marginBottom: '10px', lineHeight: 1.4, fontWeight: 700 }}>
+                    <Link href={`/blog/${rb.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                      {rb.title}
+                    </Link>
+                  </h3>
+                  <p style={{ color: '#94a3b8', fontSize: '0.95rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    {rb.metaDescription || (rb.content ? rb.content.replace(/<[^>]*>?/gm, '').substring(0, 100) + "..." : "")}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* RELATED BLOGS SECTION */}
       {relatedBlogs.length > 0 && (
