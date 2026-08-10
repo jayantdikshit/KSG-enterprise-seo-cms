@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { LeadService } from "@/services/LeadService";
 import { createContactSchema } from "@/validators/contact.validator";
 import { ZodError } from "zod";
+import { contactRateLimiter } from "@/lib/rateLimit";
 
 async function verifyRecaptcha(token: string) {
   const secretKey = process.env.RECAPTCHA_SECRET_KEY;
@@ -23,8 +24,18 @@ async function verifyRecaptcha(token: string) {
   }
 }
 
+/**
+ * POST – submit a contact form / lead.
+ * Rate-limited: 5 submissions per 15 minutes per IP.
+ */
 export async function POST(req: NextRequest) {
   try {
+    // ── Rate Limit Check ──────────────────────────────────────────────
+    const rateLimitResponse = contactRateLimiter.check(req);
+    if (rateLimitResponse) {
+      return rateLimitResponse;
+    }
+
     const body = await req.json();
     const validatedData = createContactSchema.parse(body);
 
@@ -43,7 +54,7 @@ export async function POST(req: NextRequest) {
 
     const lead = await LeadService.createLead(validatedData, ipAddress, userAgent);
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       {
         success: true,
         message: "Contact form submitted successfully",
@@ -51,6 +62,14 @@ export async function POST(req: NextRequest) {
       },
       { status: 201 }
     );
+
+    // Add rate limit info headers to the response
+    const rateLimitHeaders = contactRateLimiter.getHeaders(req);
+    for (const [key, value] of Object.entries(rateLimitHeaders)) {
+      response.headers.set(key, value);
+    }
+
+    return response;
   } catch (error: unknown) {
     if (error instanceof ZodError) {
       return NextResponse.json(

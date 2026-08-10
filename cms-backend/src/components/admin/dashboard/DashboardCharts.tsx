@@ -130,7 +130,7 @@ export const DashboardCharts: React.FC<DashboardChartsProps> = ({ monthlyLeads, 
           
           <div className="h-[420px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={leadsChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <AreaChart data={leadsChartData as any[]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorLeadsPremium" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#60A5FA" stopOpacity={0.3}/>

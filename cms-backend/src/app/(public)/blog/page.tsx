@@ -10,11 +10,10 @@ export const metadata = {
   description: "Read the latest news, articles, and insights about renewable energy, solar power, and energy efficiency.",
 };
 
-export default async function BlogListingPage({
-  searchParams,
-}: {
-  searchParams: { search?: string; category?: string; tag?: string };
+export default async function BlogListingPage(props: {
+  searchParams: Promise<{ search?: string; category?: string; tag?: string }>;
 }) {
+  const searchParams = await props.searchParams;
   await connectDB();
 
   // Fetch blogs using BlogService with searchParams

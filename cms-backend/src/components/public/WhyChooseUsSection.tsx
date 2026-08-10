@@ -17,6 +17,27 @@ interface WhyChooseUsProps {
   };
 }
 
+const SafeIcon = ({ src, alt }: { src?: string; alt?: string }) => {
+  const [error, setError] = React.useState(false);
+  
+  if (!src || error) {
+    return (
+      <div style={{ width: "64px", height: "64px", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,255,255,0.05)", borderRadius: "50%" }}>
+        <span style={{ fontSize: "1.5rem" }}>✨</span>
+      </div>
+    );
+  }
+  
+  return (
+    <img 
+      src={src} 
+      alt={alt} 
+      onError={() => setError(true)}
+      style={{ width: "64px", height: "64px", objectFit: "contain" }} 
+    />
+  );
+};
+
 export default function WhyChooseUsSection({ data }: WhyChooseUsProps) {
   if (!data || (!data.heading && (!data.cards || data.cards.length === 0))) {
     return null;
@@ -68,7 +89,7 @@ export default function WhyChooseUsSection({ data }: WhyChooseUsProps) {
               >
                 {card.icon && (
                   <div className="benefit-icon" style={{ display: "flex", justifyContent: "center", marginBottom: "1.5rem" }}>
-                    <img src={card.icon} alt={card.title} style={{ width: "64px", height: "64px", objectFit: "contain" }} />
+                    <SafeIcon src={card.icon} alt={card.title} />
                   </div>
                 )}
                 {card.title && (

@@ -21,24 +21,31 @@ class SeoService {
     // Ensure DB connection before any query
     await connectDB();
     const sitemap = new SitemapStream({ hostname: baseUrl });
-    const docs: Array<{ loc: string; lastmod?: Date }> = [];
+    const docs: Array<{ url: string; lastmod?: Date; changefreq: string; priority: number }> = [];
+
+    // Add static pages
+    docs.push({ url: '/', changefreq: 'daily', priority: 1.0 });
+    docs.push({ url: '/about', changefreq: 'monthly', priority: 0.8 });
+    docs.push({ url: '/contact', changefreq: 'monthly', priority: 0.8 });
+    docs.push({ url: '/services', changefreq: 'weekly', priority: 0.9 });
+    docs.push({ url: '/blog', changefreq: 'daily', priority: 0.9 });
 
     // Helper to push docs from a model
-    const pushFromModel = async (Model: mongoose.Model<unknown>, pathPrefix: string) => {
-      const items = await Model.find({ status: 'PUBLISHED' }).select('_id updatedAt');
+    const pushFromModel = async (Model: mongoose.Model<unknown>, pathPrefix: string, priority: number) => {
+      const items = await Model.find({ status: 'PUBLISHED' }).select('slug updatedAt');
       items.forEach((item: any) => {
-        const loc = `${pathPrefix}/${item._id}`;
-        docs.push({ loc, lastmod: item.updatedAt });
+        const loc = `${pathPrefix}/${item.slug}`;
+        docs.push({ url: loc, lastmod: item.updatedAt, changefreq: 'weekly', priority });
       });
     };
 
     await Promise.all([
-      pushFromModel(PageModel, '/page'),
-      pushFromModel(ServiceModel, '/service'),
-      pushFromModel(BlogModel, '/blog'),
+      pushFromModel(PageModel, '', 0.7),
+      pushFromModel(ServiceModel, '/services', 0.9),
+      pushFromModel(BlogModel, '/blog', 0.8),
     ]);
 
-    const stream = Readable.from(docs.map(d => ({ url: d.loc, lastmod: d.lastmod })));
+    const stream = Readable.from(docs);
     stream.pipe(sitemap);
     const data = await streamToPromise(sitemap);
     return data.toString();

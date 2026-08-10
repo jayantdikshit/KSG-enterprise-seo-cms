@@ -16,6 +16,27 @@ interface TestimonialsSectionProps {
   testimonials?: Testimonial[];
 }
 
+const TestimonialAvatar = ({ src, name }: { src?: string; name?: string }) => {
+  const [error, setError] = React.useState(false);
+  
+  if (!src || error) {
+    return (
+      <div style={{ width: "50px", height: "50px", borderRadius: "50%", backgroundColor: "#475569", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: "bold", color: "#cbd5e1" }}>
+        {name?.charAt(0) || "U"}
+      </div>
+    );
+  }
+  
+  return (
+    <img 
+      src={src} 
+      alt={name} 
+      onError={() => setError(true)}
+      style={{ width: "50px", height: "50px", borderRadius: "50%", objectFit: "cover" }} 
+    />
+  );
+};
+
 export default function TestimonialsSection({ testimonials }: TestimonialsSectionProps) {
   if (!testimonials || testimonials.length === 0) {
     return null;
@@ -56,13 +77,7 @@ export default function TestimonialsSection({ testimonials }: TestimonialsSectio
               </p>
               
               <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                {item.image ? (
-                  <img src={item.image} alt={item.customerName} style={{ width: "50px", height: "50px", borderRadius: "50%", objectFit: "cover" }} />
-                ) : (
-                  <div style={{ width: "50px", height: "50px", borderRadius: "50%", backgroundColor: "#475569", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.25rem", fontWeight: "bold", color: "#cbd5e1" }}>
-                    {item.customerName?.charAt(0) || "U"}
-                  </div>
-                )}
+                <TestimonialAvatar src={item.image} name={item.customerName} />
                 <div>
                   <h4 style={{ fontSize: "1.125rem", fontWeight: "bold", color: "#f8fafc", margin: 0 }}>{item.customerName}</h4>
                   <span style={{ color: "#94a3b8", fontSize: "0.875rem" }}>

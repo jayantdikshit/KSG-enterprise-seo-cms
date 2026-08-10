@@ -1,6 +1,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { AuthService } from '@/services/AuthService';
+import { loginRateLimiter } from '@/lib/rateLimit';
+import { generateCsrfToken, setCsrfCookie } from '@/lib/csrf';
 
 
 
@@ -17,9 +19,16 @@ export const GET = async (_req: NextRequest) => {
 
 /**
  * POST – authenticate user and set HttpOnly refresh token cookie.
+ * Rate-limited: 5 attempts per 15 minutes per IP.
  */
 export const POST = async (req: NextRequest) => {
   try {
+    // ── Rate Limit Check ──────────────────────────────────────────────
+    const rateLimitResponse = loginRateLimiter.check(req);
+    if (rateLimitResponse) {
+      return rateLimitResponse;
+    }
+
     // Guard: if a valid refresh token cookie exists, attempt to refresh and return
     const existingToken = req.cookies.get('refreshToken')?.value;
     if (existingToken) {
@@ -50,20 +59,37 @@ export const POST = async (req: NextRequest) => {
     const data = await AuthService.login(email, password);
     console.log('✅ Login success, data:', data);
 
+    // ── Generate CSRF token on successful login ─────────────────────
+    const csrfToken = generateCsrfToken();
+
     // Return fields in a shape the client expects (top‑level accessToken & user)
     const response = NextResponse.json({
       success: true,
       accessToken: data.accessToken,
       refreshToken: data.refreshToken,
       user: data.user,
+      csrfToken, // Client stores this and sends it in X-CSRF-Token header
     });
-    // Set HttpOnly refresh token cookie (secure flag omitted for local dev)
+
+    // Set HttpOnly refresh token cookie (secure flag in production)
+    const isProduction = process.env.NODE_ENV === 'production';
     response.cookies.set('refreshToken', data.refreshToken, {
       httpOnly: true,
+      secure: isProduction,
       path: '/',
       maxAge: 7 * 24 * 60 * 60, // 7 days
       sameSite: 'lax',
     });
+
+    // Set CSRF cookie (readable by JavaScript for double-submit pattern)
+    setCsrfCookie(response, csrfToken);
+
+    // Add rate limit info headers to the response
+    const rateLimitHeaders = loginRateLimiter.getHeaders(req);
+    for (const [key, value] of Object.entries(rateLimitHeaders)) {
+      response.headers.set(key, value);
+    }
+
     return response;
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Login failed";

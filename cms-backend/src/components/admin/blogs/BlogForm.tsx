@@ -52,7 +52,6 @@ export default function BlogForm({ initialData, isEdit = false }: BlogFormProps)
       ogTitle: initialData?.ogTitle || '',
       ogDescription: initialData?.ogDescription || '',
       ogImage: initialData?.ogImage || '',
-      ogImage: initialData?.ogImage || '',
       twitterCard: initialData?.twitterCard || 'summary_large_image',
       twitterTitle: initialData?.twitterTitle || '',
       twitterDescription: initialData?.twitterDescription || '',
@@ -263,7 +262,7 @@ export default function BlogForm({ initialData, isEdit = false }: BlogFormProps)
                   render={({ field }) => (
                     <DatePicker
                       label="Publish Date"
-                      value={field.value as Date}
+                      value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''}
                       onChange={field.onChange}
                       error={errors.publishDate?.message}
                     />
@@ -303,7 +302,6 @@ export default function BlogForm({ initialData, isEdit = false }: BlogFormProps)
                   value={field.value || ''}
                   onChange={field.onChange}
                   placeholder="Write your amazing blog post here..."
-                  error={errors.content?.message}
                 />
               )}
             />
@@ -316,7 +314,7 @@ export default function BlogForm({ initialData, isEdit = false }: BlogFormProps)
             </h2>
             <SEOForm
               register={register}
-              control={control}
+              control={control as any}
               errors={errors}
             />
           </div>

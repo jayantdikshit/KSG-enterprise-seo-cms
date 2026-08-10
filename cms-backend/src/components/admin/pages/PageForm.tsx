@@ -17,6 +17,7 @@ import { apiCall } from '@/utils/apiUtils';
 import { PageDTO, CreatePageDTO, UpdatePageDTO } from '@/types/page.types';
 import Breadcrumb from '@/components/admin/layout/Breadcrumb';
 import { MediaPickerModal } from '@/components/admin/common/MediaPickerModal';
+import { PageBuilder } from '@/components/admin/pages/PageBuilder';
 
 interface PageFormProps {
   initialData?: PageDTO;
@@ -55,6 +56,7 @@ export default function PageForm({ initialData, isEdit = false }: PageFormProps)
       twitterTitle: initialData?.twitterTitle || '',
       twitterDescription: initialData?.twitterDescription || '',
       twitterImage: initialData?.twitterImage || '',
+      sections: initialData?.sections || [],
     }
   });
 
@@ -210,6 +212,16 @@ export default function PageForm({ initialData, isEdit = false }: PageFormProps)
             />
           </div>
 
+          {/* Dynamic Page Builder */}
+          <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+            <Controller
+              name="sections"
+              control={control}
+              render={({ field }) => (
+                <PageBuilder sections={field.value || []} onChange={field.onChange} />
+              )}
+            />
+          </div>
           
           {/* Why Choose Us */}
           <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700">

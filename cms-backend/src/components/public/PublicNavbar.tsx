@@ -5,8 +5,9 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 
-export default function PublicNavbar({ settings, headerMenu }: { settings?: any, headerMenu?: any }) {
+export default function PublicNavbar({ settings, headerMenu, publishedServices }: { settings?: any, headerMenu?: any, publishedServices?: any[] }) {
   const [scrolled, setScrolled] = useState(false);
+  const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -134,8 +135,19 @@ export default function PublicNavbar({ settings, headerMenu }: { settings?: any,
               const url = resolveUrl(item);
               const isActive = pathname === url || (url !== "/" && pathname.startsWith(url));
               
+              const isServices = item.label?.toLowerCase() === "services" || url.includes("/services");
+
               return (
-                <li key={item._id} style={{ position: "relative" }}>
+                <li 
+                  key={item._id} 
+                  style={{ position: "relative" }}
+                  onMouseEnter={() => {
+                    if (isServices) setServicesDropdownOpen(true);
+                  }}
+                  onMouseLeave={() => {
+                    if (isServices) setServicesDropdownOpen(false);
+                  }}
+                >
                   <Link 
                     href={url} 
                     target={item.target || "_self"}
@@ -174,6 +186,65 @@ export default function PublicNavbar({ settings, headerMenu }: { settings?: any,
                       borderRadius: "2px"
                     }} />
                   </Link>
+
+                  {/* Dynamic Services Dropdown */}
+                  {isServices && publishedServices && publishedServices.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ 
+                        opacity: servicesDropdownOpen ? 1 : 0, 
+                        y: servicesDropdownOpen ? 0 : 15 
+                      }}
+                      transition={{ duration: 0.2 }}
+                      style={{
+                        position: "absolute",
+                        top: "100%",
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        marginTop: "15px",
+                        backgroundColor: "rgba(15, 23, 42, 0.95)",
+                        backdropFilter: "blur(20px)",
+                        WebkitBackdropFilter: "blur(20px)",
+                        border: "1px solid rgba(255, 255, 255, 0.1)",
+                        borderRadius: "12px",
+                        minWidth: "260px",
+                        padding: "12px 0",
+                        boxShadow: "0 20px 40px -10px rgba(0,0,0,0.5)",
+                        pointerEvents: servicesDropdownOpen ? "auto" : "none",
+                        zIndex: 60,
+                        overflow: "hidden"
+                      }}
+                    >
+                      {publishedServices.map(srv => (
+                        <Link 
+                          key={srv._id} 
+                          href={`/services/${srv.slug}`}
+                          onClick={() => setServicesDropdownOpen(false)}
+                          style={{ 
+                            display: "block", 
+                            padding: "12px 24px", 
+                            color: "#cbd5e1", 
+                            textDecoration: "none",
+                            fontSize: "0.95rem",
+                            fontWeight: "500",
+                            transition: "all 0.2s"
+                          }}
+                          onMouseEnter={(e) => {
+                            (e.target as HTMLElement).style.backgroundColor = "rgba(74, 222, 128, 0.1)";
+                            (e.target as HTMLElement).style.color = "#4ADE80";
+                            (e.target as HTMLElement).style.paddingLeft = "28px";
+                          }}
+                          onMouseLeave={(e) => {
+                            (e.target as HTMLElement).style.backgroundColor = "transparent";
+                            (e.target as HTMLElement).style.color = "#cbd5e1";
+                            (e.target as HTMLElement).style.paddingLeft = "24px";
+                          }}
+                        >
+                          {srv.name}
+                        </Link>
+                      ))}
+                    </motion.div>
+                  )}
                 </li>
               );
             })}
