@@ -150,7 +150,7 @@ export default function PublicNavbar({ settings, headerMenu, publishedServices }
                 >
                   <Link 
                     href={url} 
-                    target={item.target || "_self"}
+                    target={item.type === 'EXTERNAL' ? (item.target || '_blank') : '_self'}
                     style={{
                       color: isActive ? "#4ADE80" : "#cbd5e1",
                       textDecoration: "none",

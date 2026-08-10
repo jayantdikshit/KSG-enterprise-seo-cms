@@ -8,7 +8,7 @@ interface AuthHook {
   accessToken: string | null;
   loading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string, captchaToken?: string) => Promise<boolean>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }

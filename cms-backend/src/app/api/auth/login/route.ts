@@ -4,7 +4,25 @@ import { AuthService } from '@/services/AuthService';
 import { loginRateLimiter } from '@/lib/rateLimit';
 import { generateCsrfToken, setCsrfCookie } from '@/lib/csrf';
 
-
+async function verifyRecaptcha(token: string) {
+  const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+  if (!secretKey) {
+    // If no secret key is configured, bypass verification for development/testing
+    return true;
+  }
+  try {
+    const response = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `secret=${secretKey}&response=${token}`,
+    });
+    const result = await response.json();
+    return !!result.success;
+  } catch (error) {
+    console.error("reCAPTCHA validation error:", error);
+    return false;
+  }
+}
 
 /**
  * GET – simple health‑check for the login endpoint.
@@ -55,7 +73,19 @@ export const POST = async (req: NextRequest) => {
         return NextResponse.json({ success: false, message: 'Invalid JSON payload' }, { status: 400 });
       }
     }
-    const { email, password } = body;
+    const { email, password, captchaToken } = body;
+    
+    // ── Verify reCAPTCHA ──────────────────────────────────────────────
+    if (process.env.RECAPTCHA_SECRET_KEY) {
+      if (!captchaToken) {
+        return NextResponse.json({ success: false, message: 'reCAPTCHA verification is required' }, { status: 400 });
+      }
+      const isValidCaptcha = await verifyRecaptcha(captchaToken);
+      if (!isValidCaptcha) {
+        return NextResponse.json({ success: false, message: 'reCAPTCHA verification failed' }, { status: 400 });
+      }
+    }
+
     const data = await AuthService.login(email, password);
     console.log('✅ Login success, data:', data);
 

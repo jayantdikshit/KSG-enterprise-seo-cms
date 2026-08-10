@@ -14,7 +14,7 @@ interface AuthContextProps {
   accessToken: string | null;
   loading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string, captchaToken?: string) => Promise<boolean>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -33,17 +33,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     refresh();
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string, captchaToken?: string): Promise<boolean> => {
     setLoading(true);
     setError(null);
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, captchaToken }),
         credentials: 'include', // for refresh token cookie
       });
-      if (!res.ok) throw new Error('Invalid credentials');
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || errorData.error || 'Invalid credentials');
+      }
       const data = await res.json();
       
       const token = data.accessToken || (data.data && data.data.accessToken);
